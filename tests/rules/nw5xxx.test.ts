@@ -57,7 +57,7 @@ describe('NW5001 — AuthorizationPolicy ALLOW with principals: ["*"]', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW5001');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('critical');
     expect(findings[0].name).toBe('allow-all');
   });
 
@@ -114,7 +114,7 @@ describe('NW5002 — AuthorizationPolicy ALLOW with empty source', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW5002');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire when source has principals', () => {
@@ -158,7 +158,7 @@ describe('NW5003 — AuthorizationPolicy ALLOW with methods: ["*"]', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW5003');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire when methods are specific', () => {
@@ -193,7 +193,7 @@ describe('NW5004 — AuthorizationPolicy ALLOW rule with no from/to', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW5004');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('critical');
   });
 
   it('does not fire when rule has "from"', () => {
@@ -243,7 +243,7 @@ describe('NW5005 — PeerAuthentication PERMISSIVE mTLS', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW5005');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire for STRICT mode', () => {
@@ -275,7 +275,7 @@ describe('NW5006 — PeerAuthentication DISABLE mTLS', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW5006');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('high');
   });
 
   it('does not fire for PERMISSIVE mode', () => {
@@ -350,7 +350,7 @@ describe('NW5008 — AuthorizationPolicy ALLOW with no namespace restriction', (
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW5008');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire when both principals and namespaces are set', () => {

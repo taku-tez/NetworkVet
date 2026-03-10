@@ -23,7 +23,7 @@ function makeFinding(
 /** NW3001: Ingress without TLS configured */
 export const NW3001: Rule = {
   id: 'NW3001',
-  severity: 'error',
+  severity: 'high',
   description: 'Ingress without TLS configured',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -48,7 +48,7 @@ export const NW3001: Rule = {
 /** NW3002: Ingress TLS but no HSTS annotation */
 export const NW3002: Rule = {
   id: 'NW3002',
-  severity: 'warning',
+  severity: 'low',
   description: 'Ingress has TLS but no HSTS annotation',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -79,7 +79,7 @@ export const NW3002: Rule = {
 /** NW3003: Ingress without HTTP→HTTPS redirect */
 export const NW3003: Rule = {
   id: 'NW3003',
-  severity: 'warning',
+  severity: 'low',
   description: 'Ingress without HTTP to HTTPS redirect',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -110,7 +110,7 @@ export const NW3003: Rule = {
 /** NW3004: Ingress with wildcard host (*) */
 export const NW3004: Rule = {
   id: 'NW3004',
-  severity: 'warning',
+  severity: 'medium',
   description: 'Ingress with wildcard host (*)',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -172,7 +172,7 @@ const SENSITIVE_PATH_PATTERNS = [
 /** NW3006: Ingress exposes admin/internal paths publicly */
 export const NW3006: Rule = {
   id: 'NW3006',
-  severity: 'warning',
+  severity: 'medium',
   description: 'Ingress exposes admin or internal paths publicly',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -205,7 +205,7 @@ export const NW3006: Rule = {
 /** NW3007: Ingress references non-existent Service backend */
 export const NW3007: Rule = {
   id: 'NW3007',
-  severity: 'error',
+  severity: 'high',
   description: 'Ingress references non-existent Service backend',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];

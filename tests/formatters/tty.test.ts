@@ -5,7 +5,7 @@ import type { Finding } from '../../src/types.js';
 const sampleFindings: Finding[] = [
   {
     id: 'NW1001',
-    severity: 'error',
+    severity: 'high',
     kind: 'NetworkPolicy',
     name: 'allow-all',
     namespace: 'default',
@@ -16,7 +16,7 @@ const sampleFindings: Finding[] = [
   },
   {
     id: 'NW2001',
-    severity: 'warning',
+    severity: 'medium',
     kind: 'Service',
     name: 'my-nodeport',
     namespace: 'default',
@@ -58,8 +58,8 @@ describe('formatTty', () => {
 
   it('includes severity labels', () => {
     const output = formatTty(sampleFindings);
-    expect(output).toContain('error');
-    expect(output).toContain('warning');
+    expect(output).toContain('high');
+    expect(output).toContain('medium');
     expect(output).toContain('info');
   });
 
@@ -83,8 +83,8 @@ describe('formatTty', () => {
   it('includes summary with counts', () => {
     const output = formatTty(sampleFindings);
     expect(output).toContain('3 finding');
-    expect(output).toContain('1 error');
-    expect(output).toContain('1 warning');
+    expect(output).toContain('1 high');
+    expect(output).toContain('1 medium');
     expect(output).toContain('1 info');
   });
 
@@ -92,7 +92,7 @@ describe('formatTty', () => {
     const findings: Finding[] = [
       {
         id: 'NW1001',
-        severity: 'error',
+        severity: 'high',
         kind: 'NetworkPolicy',
         name: 'p1',
         namespace: 'default',
@@ -102,7 +102,7 @@ describe('formatTty', () => {
       },
       {
         id: 'NW1002',
-        severity: 'error',
+        severity: 'high',
         kind: 'NetworkPolicy',
         name: 'p2',
         namespace: 'default',
@@ -112,7 +112,7 @@ describe('formatTty', () => {
       },
       {
         id: 'NW2001',
-        severity: 'warning',
+        severity: 'medium',
         kind: 'Service',
         name: 's1',
         namespace: 'default',
@@ -135,7 +135,7 @@ describe('formatTty', () => {
     const findings: Finding[] = [
       {
         id: 'NW3001',
-        severity: 'error',
+        severity: 'high',
         kind: 'Ingress',
         name: 'my-ingress',
         namespace: 'production',
@@ -146,14 +146,14 @@ describe('formatTty', () => {
     ];
     const output = formatTty(findings);
     expect(output).toContain('1 finding');
-    expect(output).toContain('1 error');
+    expect(output).toContain('1 high');
   });
 
   it('shows line numbers when line > 0', () => {
     const findings: Finding[] = [
       {
         id: 'NW1001',
-        severity: 'error',
+        severity: 'high',
         kind: 'NetworkPolicy',
         name: 'p1',
         namespace: 'default',

@@ -10,7 +10,7 @@ import type { Finding } from '../../src/types.js';
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
-function makeFinding(id: string, severity: Finding['severity'] = 'error'): Finding {
+function makeFinding(id: string, severity: Finding['severity'] = 'high'): Finding {
   return {
     id,
     severity,

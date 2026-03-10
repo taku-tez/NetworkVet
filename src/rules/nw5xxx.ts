@@ -24,7 +24,7 @@ function makeFinding(
 // AuthorizationPolicy ALLOW rule has principals: ["*"] — any workload identity
 const nw5001: Rule = {
   id: 'NW5001',
-  severity: 'error',
+  severity: 'critical',
   description: 'AuthorizationPolicy ALLOW rule grants access to all principals (principals: ["*"])',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -54,7 +54,7 @@ const nw5001: Rule = {
 // AuthorizationPolicy ALLOW rule has a "from" with no source constraints at all
 const nw5002: Rule = {
   id: 'NW5002',
-  severity: 'warning',
+  severity: 'medium',
   description: 'AuthorizationPolicy ALLOW rule has a "from" clause with an empty source (matches any source)',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -93,7 +93,7 @@ const nw5002: Rule = {
 // AuthorizationPolicy ALLOW rule has methods: ["*"] — all HTTP methods allowed
 const nw5003: Rule = {
   id: 'NW5003',
-  severity: 'warning',
+  severity: 'medium',
   description: 'AuthorizationPolicy ALLOW rule permits all HTTP methods (methods: ["*"])',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -124,7 +124,7 @@ const nw5003: Rule = {
 // (matches all traffic unconditionally)
 const nw5004: Rule = {
   id: 'NW5004',
-  severity: 'error',
+  severity: 'critical',
   description: 'AuthorizationPolicy ALLOW rule has neither "from" nor "to" — allows all traffic unconditionally',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -156,7 +156,7 @@ const nw5004: Rule = {
 // PeerAuthentication uses PERMISSIVE mTLS mode — allows both plaintext and mTLS
 const nw5005: Rule = {
   id: 'NW5005',
-  severity: 'warning',
+  severity: 'medium',
   description: 'PeerAuthentication uses PERMISSIVE mTLS mode — plaintext traffic is accepted',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -179,7 +179,7 @@ const nw5005: Rule = {
 // PeerAuthentication explicitly disables mTLS
 const nw5006: Rule = {
   id: 'NW5006',
-  severity: 'error',
+  severity: 'high',
   description: 'PeerAuthentication disables mTLS (mode: DISABLE) — all traffic is plaintext',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -231,7 +231,7 @@ const nw5007: Rule = {
 // (source.namespaces is absent or empty) while principals are set
 const nw5008: Rule = {
   id: 'NW5008',
-  severity: 'warning',
+  severity: 'medium',
   description: 'AuthorizationPolicy ALLOW rule grants access without restricting the source namespace',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];

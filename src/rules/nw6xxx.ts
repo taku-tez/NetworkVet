@@ -24,7 +24,7 @@ function makeFinding(
 // CiliumNetworkPolicy ingress allows from "world" entity (any external IP)
 const nw6001: Rule = {
   id: 'NW6001',
-  severity: 'error',
+  severity: 'critical',
   description: 'CiliumNetworkPolicy ingress rule allows traffic from the "world" entity (any external IP)',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -50,7 +50,7 @@ const nw6001: Rule = {
 // CiliumNetworkPolicy egress allows to "world" entity (any external IP)
 const nw6002: Rule = {
   id: 'NW6002',
-  severity: 'warning',
+  severity: 'medium',
   description: 'CiliumNetworkPolicy egress rule allows traffic to the "world" entity (any external IP)',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -76,7 +76,7 @@ const nw6002: Rule = {
 // CiliumNetworkPolicy uses "all" entity — matches any endpoint cluster-wide
 const nw6003: Rule = {
   id: 'NW6003',
-  severity: 'error',
+  severity: 'critical',
   description: 'CiliumNetworkPolicy rule uses the "all" entity — matches every endpoint in the cluster',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -128,7 +128,7 @@ const nw6004: Rule = {
 // CiliumNetworkPolicy ingress allows from 0.0.0.0/0 CIDR
 const nw6005: Rule = {
   id: 'NW6005',
-  severity: 'error',
+  severity: 'critical',
   description: 'CiliumNetworkPolicy ingress rule allows from CIDR 0.0.0.0/0 (any IP)',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -157,7 +157,7 @@ const nw6005: Rule = {
 // CiliumClusterwideNetworkPolicy has no nodeSelector — applies to all nodes
 const nw6006: Rule = {
   id: 'NW6006',
-  severity: 'warning',
+  severity: 'medium',
   description: 'CiliumClusterwideNetworkPolicy has no nodeSelector — applies to all nodes in the cluster',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -182,7 +182,7 @@ const nw6006: Rule = {
 // CiliumNetworkPolicy egress toFQDNs matchPattern: "*" — allows any DNS name
 const nw6007: Rule = {
   id: 'NW6007',
-  severity: 'warning',
+  severity: 'medium',
   description: 'CiliumNetworkPolicy egress uses toFQDNs matchPattern: "*" — allows egress to any domain',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];

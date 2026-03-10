@@ -144,7 +144,7 @@ async function main(): Promise<void> {
     })
     .option('webhook-deny-on-error', {
       type: 'boolean',
-      description: 'Reject resources with severity=error findings (default: warn-only)',
+      description: 'Reject resources with critical/high severity findings (default: warn-only)',
       default: false,
     })
     .option('webhook-manifest', {
@@ -159,7 +159,7 @@ async function main(): Promise<void> {
     })
     // --- Output filtering ---
     .option('severity', {
-      choices: ['error', 'warning', 'info'] as const,
+      choices: ['critical', 'high', 'medium', 'low', 'info'] as const,
       description: 'Only show findings at or above this severity level',
     })
     .option('rule', {
@@ -200,7 +200,7 @@ async function main(): Promise<void> {
     .example('$0 --webhook --webhook-port 8443 --webhook-deny-on-error', 'Run as validating webhook server')
     .example('$0 --webhook-manifest', 'Print Kubernetes deployment manifest for webhook')
     .example('$0 --dir ./k8s --config ./myconfig.yaml', 'Use a specific config file')
-    .example('$0 --dir ./k8s --severity error', 'Only show errors')
+    .example('$0 --dir ./k8s --severity high', 'Only show high and critical findings')
     .example('$0 --dir ./k8s --group-by namespace', 'Group output by namespace')
     .example('$0 --dir ./k8s --rule NW1001,NW2001', 'Show findings for specific rules only')
     .example('$0 --dir ./k8s --verbose', 'Show per-rule timing statistics')
@@ -227,7 +227,7 @@ async function main(): Promise<void> {
   const webhookDenyOnError = argv['webhook-deny-on-error'] as boolean;
   const wantWebhookManifest = argv['webhook-manifest'] as boolean;
   const configPath = argv.config as string | undefined;
-  const severityFilter = argv.severity as 'error' | 'warning' | 'info' | undefined;
+  const severityFilter = argv.severity as 'critical' | 'high' | 'medium' | 'low' | 'info' | undefined;
   const ruleFilter = argv.rule as string | undefined;
   const groupBy = argv['group-by'] as GroupBy;
   const wantVerbose = argv.verbose as boolean;
@@ -381,7 +381,7 @@ async function main(): Promise<void> {
 
   // ---- Filtering --------------------------------------------------------
   // --severity filter
-  const SEVERITY_RANK: Record<string, number> = { error: 0, warning: 1, info: 2 };
+  const SEVERITY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
   let filteredFindings = findings;
   if (severityFilter) {
     const threshold = SEVERITY_RANK[severityFilter] ?? 2;
@@ -515,7 +515,7 @@ async function main(): Promise<void> {
 
   // Exit with code 1 if any errors were found (using unfiltered findings so --severity filter
   // doesn't suppress the exit code), or if any traffic violations at error severity
-  const hasErrors = findings.some((f) => f.severity === 'error') ||
+  const hasErrors = findings.some((f) => f.severity === 'critical' || f.severity === 'high') ||
     (trafficResult?.violations.some((v) => v.severity === 'error') ?? false);
   process.exit(hasErrors ? 1 : 0);
 }

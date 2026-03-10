@@ -9,7 +9,7 @@ import type { Finding, ParsedResource } from '../../src/types.js';
 function makeFinding(overrides: Partial<Finding> = {}): Finding {
   return {
     id: 'NW1003',
-    severity: 'error',
+    severity: 'high',
     kind: 'Namespace',
     name: 'default',
     namespace: 'default',

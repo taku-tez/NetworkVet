@@ -1,6 +1,6 @@
 // Core type definitions for NetworkVet
 
-export type Severity = 'error' | 'warning' | 'info';
+export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 
 export type ResourceKind =
   | 'NetworkPolicy'

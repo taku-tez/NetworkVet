@@ -6,8 +6,10 @@ export interface JsonOutput {
   timestamp: string;
   summary: {
     total: number;
-    errors: number;
-    warnings: number;
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
     infos: number;
   };
   findings: Finding[];
@@ -23,8 +25,10 @@ export function formatJson(findings: Finding[], reachability?: ReachabilityResul
     timestamp: new Date().toISOString(),
     summary: {
       total: findings.length,
-      errors: findings.filter((f) => f.severity === 'error').length,
-      warnings: findings.filter((f) => f.severity === 'warning').length,
+      critical: findings.filter((f) => f.severity === 'critical').length,
+      high: findings.filter((f) => f.severity === 'high').length,
+      medium: findings.filter((f) => f.severity === 'medium').length,
+      low: findings.filter((f) => f.severity === 'low').length,
       infos: findings.filter((f) => f.severity === 'info').length,
     },
     findings,

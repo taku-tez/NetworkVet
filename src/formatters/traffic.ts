@@ -9,6 +9,7 @@ function severityIcon(severity: TrafficViolation['severity']): string {
     case 'error':   return '✖';
     case 'warning': return '⚠';
     case 'info':    return '·';
+    default:        return '·';
   }
 }
 

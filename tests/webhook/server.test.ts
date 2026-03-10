@@ -185,9 +185,11 @@ describe('handleAdmissionRequest – deny-on-error mode (denyOnError=true)', () 
   });
 
   it('allows a NodePort Service with warn-enforcement rule even in denyOnError mode', () => {
-    // NW2001 (NodePort) is warn-level — should not deny
+    // NW2001 (NodePort) is medium (advisory) — should not deny on its own.
+    // NW1003 (no NetworkPolicy in namespace) fires as high; ignore it so we
+    // can verify that the medium-only finding does not block admission.
     const req = makeServiceRequest();
-    const res = handleAdmissionRequest(req, [], true, true);
+    const res = handleAdmissionRequest(req, ['NW1003'], true, true);
     expect(res.response.allowed).toBe(true);
   });
 
@@ -204,8 +206,9 @@ describe('handleAdmissionRequest – deny-on-error mode (denyOnError=true)', () 
 describe('handleAdmissionRequest – ignoreIds', () => {
   it('suppresses a finding when its ID is in ignoreIds', () => {
     const req = makeRequest();
-    // Ignore NW1001 — the wildcard ingress finding should be suppressed
-    const res = handleAdmissionRequest(req, ['NW1001'], true, true);
+    // Ignore both NW1001 (wildcard ingress, high) and NW4001 (no default-deny, high)
+    // so that only advisory findings remain and the request is allowed.
+    const res = handleAdmissionRequest(req, ['NW1001', 'NW4001'], true, true);
     expect(res.response.allowed).toBe(true);
     expect(res.response.status).toBeUndefined();
   });

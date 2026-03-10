@@ -38,7 +38,7 @@ spec:
     const findings = check(NW2001, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW2001');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
     expect(findings[0].name).toBe('my-nodeport');
   });
 
@@ -162,7 +162,7 @@ spec:
     const findings = check(NW2003, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW2003');
-    expect(findings[0].severity).toBe('info');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not trigger when loadBalancerSourceRanges is set', () => {
@@ -218,7 +218,7 @@ spec:
     const findings = check(NW2004, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW2004');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('triggers when targetPort is 22', () => {
@@ -321,7 +321,7 @@ spec:
     const findings = check(NW2006, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW2006');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('high');
   });
 
   it('triggers when multiple externalIPs are set', () => {
@@ -467,7 +467,7 @@ spec:
     const findings = check(NW2008, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW2008');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('critical');
   });
 
   it('triggers when ExternalName points to .svc suffix', () => {

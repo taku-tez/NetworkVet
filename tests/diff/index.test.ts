@@ -25,7 +25,7 @@ import fs from 'node:fs';
 function makeFinding(overrides: Partial<Finding> = {}): Finding {
   return {
     id: 'NW1003',
-    severity: 'error',
+    severity: 'high',
     kind: 'Namespace',
     name: 'default',
     namespace: 'default',

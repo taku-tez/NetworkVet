@@ -23,7 +23,7 @@ function makeFinding(
 /** NW2001: Service type NodePort */
 export const NW2001: Rule = {
   id: 'NW2001',
-  severity: 'warning',
+  severity: 'medium',
   description: 'Service type NodePort exposes ports on every node',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -43,7 +43,7 @@ export const NW2001: Rule = {
 /** NW2002: Service type LoadBalancer without externalTrafficPolicy: Local */
 export const NW2002: Rule = {
   id: 'NW2002',
-  severity: 'warning',
+  severity: 'low',
   description: 'LoadBalancer Service without externalTrafficPolicy: Local loses source IP',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -68,7 +68,7 @@ export const NW2002: Rule = {
 /** NW2003: LoadBalancer Service without source IP restriction annotation */
 export const NW2003: Rule = {
   id: 'NW2003',
-  severity: 'info',
+  severity: 'medium',
   description: 'LoadBalancer Service without source IP restriction annotation',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -100,7 +100,7 @@ export const NW2003: Rule = {
 /** NW2004: Service targets port 22 (SSH) */
 export const NW2004: Rule = {
   id: 'NW2004',
-  severity: 'warning',
+  severity: 'medium',
   description: 'Service targets port 22 (SSH) — potential security risk',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -152,7 +152,7 @@ export const NW2005: Rule = {
 /** NW2006: Service externalIPs field set (potential MITM risk) */
 export const NW2006: Rule = {
   id: 'NW2006',
-  severity: 'warning',
+  severity: 'high',
   description: 'Service externalIPs field set — potential MITM risk',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -224,7 +224,7 @@ export const NW2007: Rule = {
 /** NW2008: Service of type ExternalName pointing to internal cluster DNS */
 export const NW2008: Rule = {
   id: 'NW2008',
-  severity: 'error',
+  severity: 'critical',
   description: 'Service of type ExternalName pointing to internal cluster DNS',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];

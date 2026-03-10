@@ -64,10 +64,10 @@ ignore:
     const p = tempConfig('override.yaml', `
 override:
   NW1003:
-    severity: error
+    severity: high
 `);
     const cfg = loadConfig(p);
-    expect(cfg.override?.['NW1003']?.severity).toBe('error');
+    expect(cfg.override?.['NW1003']?.severity).toBe('high');
   });
 
   it('loads ingressClass from config', () => {
@@ -146,7 +146,7 @@ ignore:
   - NW2007
 override:
   NW1003:
-    severity: error
+    severity: high
 ingressClass: alb
 excludeNamespaces:
   - kube-system
@@ -157,7 +157,7 @@ rules:
 `);
     const cfg = loadConfig(p);
     expect(cfg.ignore).toContain('NW1006');
-    expect(cfg.override?.['NW1003']?.severity).toBe('error');
+    expect(cfg.override?.['NW1003']?.severity).toBe('high');
     expect(cfg.ingressClass).toBe('alb');
     expect(cfg.excludeNamespaces).toContain('kube-system');
     expect(cfg.cloudProvider).toBe('aws');

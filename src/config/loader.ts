@@ -7,7 +7,7 @@ export interface NetworkVetConfig {
   ignore?: string[];
   /** Per-rule overrides — currently supports severity override */
   override?: Record<string, {
-    severity?: 'error' | 'warning' | 'info';
+    severity?: 'critical' | 'high' | 'medium' | 'low' | 'info';
   }>;
   /** Ingress controller type — affects annotation checks */
   ingressClass?: string;

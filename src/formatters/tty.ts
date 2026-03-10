@@ -10,21 +10,27 @@ export interface FormatTtyOptions {
 }
 
 const SEVERITY_COLOR: Record<string, ChalkFn> = {
-  error: chalk.red,
-  warning: chalk.yellow,
+  critical: chalk.redBright,
+  high: chalk.red,
+  medium: chalk.yellow,
+  low: chalk.cyan,
   info: chalk.blue,
 };
 
 const SEVERITY_LABEL: Record<string, string> = {
-  error: 'error  ',
-  warning: 'warning',
-  info: 'info   ',
+  critical: 'critical',
+  high: 'high    ',
+  medium: 'medium  ',
+  low: 'low     ',
+  info: 'info    ',
 };
 
 const SEVERITY_ORDER: Record<string, number> = {
-  error: 0,
-  warning: 1,
-  info: 2,
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+  info: 4,
 };
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -44,13 +50,17 @@ function formatDetail(f: Finding): string | null {
 }
 
 function buildSummary(findings: Finding[]): string {
-  const errors = findings.filter((f) => f.severity === 'error').length;
-  const warnings = findings.filter((f) => f.severity === 'warning').length;
+  const criticals = findings.filter((f) => f.severity === 'critical').length;
+  const highs = findings.filter((f) => f.severity === 'high').length;
+  const mediums = findings.filter((f) => f.severity === 'medium').length;
+  const lows = findings.filter((f) => f.severity === 'low').length;
   const infos = findings.filter((f) => f.severity === 'info').length;
 
   const summaryParts: string[] = [];
-  if (errors > 0) summaryParts.push(chalk.red(`${errors} error${errors !== 1 ? 's' : ''}`));
-  if (warnings > 0) summaryParts.push(chalk.yellow(`${warnings} warning${warnings !== 1 ? 's' : ''}`));
+  if (criticals > 0) summaryParts.push(chalk.redBright(`${criticals} critical`));
+  if (highs > 0) summaryParts.push(chalk.red(`${highs} high`));
+  if (mediums > 0) summaryParts.push(chalk.yellow(`${mediums} medium`));
+  if (lows > 0) summaryParts.push(chalk.cyan(`${lows} low`));
   if (infos > 0) summaryParts.push(chalk.blue(`${infos} info${infos !== 1 ? 's' : ''}`));
 
   return (
@@ -104,8 +114,10 @@ function byNamespace(findings: Finding[]): string {
 
 function bySeverity(findings: Finding[]): string {
   const LABELS: Record<string, string> = {
-    error: 'Errors',
-    warning: 'Warnings',
+    critical: 'Critical',
+    high: 'High',
+    medium: 'Medium',
+    low: 'Low',
     info: 'Info',
   };
 
@@ -115,7 +127,7 @@ function bySeverity(findings: Finding[]): string {
     map.get(f.severity)!.push(f);
   }
 
-  const order = ['error', 'warning', 'info'];
+  const order = ['critical', 'high', 'medium', 'low', 'info'];
   const lines: string[] = [];
   for (const sev of order) {
     const group = map.get(sev);

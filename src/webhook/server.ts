@@ -120,21 +120,21 @@ export function handleAdmissionRequest(
   // Run rules against the single resource
   const findings = runRules([resource], ignoreIds);
 
-  // Separate by severity
-  const errors = findings.filter((f) => f.severity === 'error');
-  const warnings = findings.filter((f) => f.severity === 'warning' || f.severity === 'info');
+  // Separate by severity — critical/high are blocking; medium/low/info are advisory
+  const errors = findings.filter((f) => f.severity === 'critical' || f.severity === 'high');
+  const warnings = findings.filter((f) => f.severity === 'medium' || f.severity === 'low' || f.severity === 'info');
 
-  // Build warnings list (always include error messages as warnings too when not denying)
+  // Build warnings list
   const warningMessages: string[] = [];
   if (warnOnWarning) {
     for (const f of warnings) {
       warningMessages.push(`[${f.id}] ${f.message}`);
     }
-  }
-  // When denying, errors are in the status message; when not denying, include them as warnings too
-  if (!denyOnError) {
-    for (const f of errors) {
-      warningMessages.push(`[${f.id}] ${f.message}`);
+    // When not denying, also surface critical/high findings as warnings
+    if (!denyOnError) {
+      for (const f of errors) {
+        warningMessages.push(`[${f.id}] ${f.message}`);
+      }
     }
   }
 

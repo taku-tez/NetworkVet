@@ -41,7 +41,7 @@ spec:
     const findings = check(NW3001, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW3001');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('high');
   });
 
   it('triggers when TLS is empty array', () => {
@@ -107,7 +107,7 @@ spec:
     const findings = check(NW3002, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW3002');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('low');
   });
 
   it('does not trigger when nginx.ingress.kubernetes.io/hsts is true', () => {
@@ -231,7 +231,7 @@ spec:
     const findings = check(NW3004, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW3004');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('triggers when host is empty/missing', () => {
@@ -356,7 +356,7 @@ spec:
     const findings = check(NW3006, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW3006');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('triggers for /_ path prefix', () => {
@@ -455,7 +455,7 @@ spec:
     const findings = check(NW3007, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW3007');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('high');
     expect(findings[0].message).toContain('missing-service');
   });
 

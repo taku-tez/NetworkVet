@@ -11,7 +11,7 @@ import type { ReachabilityEntry } from '../../src/reachability/evaluator.js';
 function makeFinding(overrides: Partial<Finding> = {}): Finding {
   return {
     id: 'NW1001',
-    severity: 'error',
+    severity: 'high',
     kind: 'NetworkPolicy',
     name: 'allow-all',
     namespace: 'default',
@@ -89,9 +89,9 @@ describe('formatDiffTty — new issues section', () => {
   });
 
   it('includes severity in new findings', () => {
-    const diff = { ...emptyDiff(), newFindings: [makeFinding({ severity: 'warning' })] };
+    const diff = { ...emptyDiff(), newFindings: [makeFinding({ severity: 'medium' })] };
     const output = formatDiffTty(diff);
-    expect(output).toMatch(/warning/);
+    expect(output).toMatch(/medium/);
   });
 
   it('includes resource name in new findings', () => {

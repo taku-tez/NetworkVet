@@ -40,7 +40,7 @@ function isEmptyObject(obj: unknown): boolean {
 /** NW1001: Ingress from: [{}] — allows all sources */
 export const NW1001: Rule = {
   id: 'NW1001',
-  severity: 'error',
+  severity: 'high',
   description: 'Ingress from: [{}] allows all sources',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -67,7 +67,7 @@ export const NW1001: Rule = {
 /** NW1002: Egress to: [{}] — allows all destinations */
 export const NW1002: Rule = {
   id: 'NW1002',
-  severity: 'error',
+  severity: 'high',
   description: 'Egress to: [{}] allows all destinations',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -94,7 +94,7 @@ export const NW1002: Rule = {
 /** NW1003: Namespace has no NetworkPolicy */
 export const NW1003: Rule = {
   id: 'NW1003',
-  severity: 'warning',
+  severity: 'high',
   description: 'Namespace has no NetworkPolicy (all traffic permitted)',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -176,7 +176,7 @@ export const NW1003: Rule = {
 /** NW1004: NetworkPolicy podSelector: {} targets all pods */
 export const NW1004: Rule = {
   id: 'NW1004',
-  severity: 'warning',
+  severity: 'medium',
   description: 'NetworkPolicy podSelector: {} targets all pods in namespace',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -210,7 +210,7 @@ export const NW1004: Rule = {
 /** NW1005: NetworkPolicy allows traffic from all namespaces (namespaceSelector: {}) */
 export const NW1005: Rule = {
   id: 'NW1005',
-  severity: 'warning',
+  severity: 'medium',
   description: 'NetworkPolicy allows traffic from all namespaces (namespaceSelector: {})',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -268,7 +268,7 @@ export const NW1006: Rule = {
 /** NW1007: NetworkPolicy allows traffic from kube-system namespace */
 export const NW1007: Rule = {
   id: 'NW1007',
-  severity: 'warning',
+  severity: 'low',
   description: 'NetworkPolicy allows traffic from kube-system namespace to workload pods',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -319,7 +319,7 @@ export const NW1008: Rule = {
 /** NW1009: Ingress policy missing — pod has no ingress restrictions */
 export const NW1009: Rule = {
   id: 'NW1009',
-  severity: 'warning',
+  severity: 'medium',
   description: 'Ingress policy missing — pod has no ingress restrictions',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -356,7 +356,7 @@ export const NW1009: Rule = {
 /** NW1010: Egress policy missing — pod has no egress restrictions */
 export const NW1010: Rule = {
   id: 'NW1010',
-  severity: 'warning',
+  severity: 'medium',
   description: 'Egress policy missing — pod has no egress restrictions',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];

@@ -46,8 +46,10 @@ interface SarifLog {
 }
 
 const SEVERITY_TO_LEVEL: Record<string, SarifResult['level']> = {
-  error: 'error',
-  warning: 'warning',
+  critical: 'error',
+  high: 'error',
+  medium: 'warning',
+  low: 'warning',
   info: 'note',
 };
 

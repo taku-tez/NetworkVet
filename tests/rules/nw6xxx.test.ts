@@ -53,7 +53,7 @@ describe('NW6001 — CiliumNetworkPolicy ingress from "world"', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW6001');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('critical');
   });
 
   it('does not fire when ingress uses "cluster" entity', () => {
@@ -106,7 +106,7 @@ describe('NW6002 — CiliumNetworkPolicy egress to "world"', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW6002');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire for ingress "world" (NW6001 handles that)', () => {
@@ -151,7 +151,7 @@ describe('NW6003 — CiliumNetworkPolicy uses "all" entity', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW6003');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('critical');
   });
 
   it('fires when egress toEntities includes "all"', () => {
@@ -220,7 +220,7 @@ describe('NW6005 — CiliumNetworkPolicy ingress from CIDR 0.0.0.0/0', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW6005');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('critical');
   });
 
   it('fires when ingress fromCIDRSet has 0.0.0.0/0', () => {
@@ -263,7 +263,7 @@ describe('NW6006 — CiliumClusterwideNetworkPolicy with no nodeSelector', () =>
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW6006');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('fires when nodeSelector is empty {}', () => {
@@ -307,7 +307,7 @@ describe('NW6007 — CiliumNetworkPolicy egress toFQDNs matchPattern: "*"', () =
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW6007');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire for specific matchPattern', () => {

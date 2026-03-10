@@ -105,7 +105,7 @@ function isLoadBalancerService(r: ParsedResource): boolean {
  */
 const nw7001: Rule = {
   id: 'NW7001',
-  severity: 'warning',
+  severity: 'medium',
   description: 'AWS NLB Service has no internal annotation — load balancer may be internet-facing',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -138,7 +138,7 @@ const nw7001: Rule = {
  */
 const nw7002: Rule = {
   id: 'NW7002',
-  severity: 'error',
+  severity: 'high',
   description: 'AWS LoadBalancer Service has access logs explicitly disabled',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -165,7 +165,7 @@ const nw7002: Rule = {
  */
 const nw7003: Rule = {
   id: 'NW7003',
-  severity: 'warning',
+  severity: 'medium',
   description: 'AWS LoadBalancer Service has no SSL certificate annotation — HTTPS offload not configured',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -229,7 +229,7 @@ const nw7004: Rule = {
  */
 const nw7005: Rule = {
   id: 'NW7005',
-  severity: 'warning',
+  severity: 'medium',
   description: 'ALB Ingress has no scheme annotation — load balancer defaults to internet-facing',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -260,7 +260,7 @@ const nw7005: Rule = {
  */
 const nw7006: Rule = {
   id: 'NW7006',
-  severity: 'error',
+  severity: 'high',
   description: 'ALB Ingress has no custom security group annotation — uses permissive default security group',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -291,7 +291,7 @@ const nw7006: Rule = {
  */
 const nw7007: Rule = {
   id: 'NW7007',
-  severity: 'warning',
+  severity: 'low',
   description: 'ALB Ingress has TLS configured but no ssl-policy annotation — cipher suite not pinned',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -357,7 +357,7 @@ const nw7008: Rule = {
  */
 const nw7009: Rule = {
   id: 'NW7009',
-  severity: 'warning',
+  severity: 'medium',
   description: 'GKE LoadBalancer Service has no internal annotation — may be an external LoadBalancer',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -389,7 +389,7 @@ const nw7009: Rule = {
  */
 const nw7010: Rule = {
   id: 'NW7010',
-  severity: 'warning',
+  severity: 'medium',
   description: 'GCE Ingress does not disable HTTP — traffic can reach the backend unencrypted',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -449,7 +449,7 @@ const nw7011: Rule = {
  */
 const nw7012: Rule = {
   id: 'NW7012',
-  severity: 'warning',
+  severity: 'medium',
   description: 'GKE BackendConfig has no Cloud Armor security policy configured',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -479,7 +479,7 @@ const nw7012: Rule = {
  */
 const nw7013: Rule = {
   id: 'NW7013',
-  severity: 'warning',
+  severity: 'medium',
   description: 'AKS LoadBalancer Service has azure-load-balancer-internal explicitly set to "false" — internet-facing LB confirmed',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -534,7 +534,7 @@ const nw7014: Rule = {
  */
 const nw7015: Rule = {
   id: 'NW7015',
-  severity: 'warning',
+  severity: 'medium',
   description: 'Azure Application Gateway Ingress has no WAF policy annotation configured',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];

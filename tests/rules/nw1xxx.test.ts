@@ -37,7 +37,7 @@ spec:
     const findings = check(NW1001, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW1001');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('high');
   });
 
   it('does not trigger when ingress has specific peer', () => {
@@ -116,7 +116,7 @@ spec:
     const findings = check(NW1002, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW1002');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('high');
   });
 
   it('does not trigger when egress has specific destination', () => {
@@ -411,7 +411,7 @@ spec:
     const findings = check(NW1004, yaml);
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW1004');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does NOT trigger on default-deny policies (podSelector: {} with empty ingress)', () => {

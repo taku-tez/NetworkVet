@@ -24,11 +24,11 @@ function makeFinding(
 }
 
 const SAMPLE: Finding[] = [
-  makeFinding('NW1001', 'error', 'frontend', 'a.yaml'),
-  makeFinding('NW1002', 'error', 'backend', 'a.yaml'),
-  makeFinding('NW2001', 'warning', 'frontend', 'b.yaml'),
-  makeFinding('NW3001', 'error', 'payments', 'b.yaml'),
-  makeFinding('NW4001', 'warning', 'backend', 'c.yaml'),
+  makeFinding('NW1001', 'high', 'frontend', 'a.yaml'),
+  makeFinding('NW1002', 'high', 'backend', 'a.yaml'),
+  makeFinding('NW2001', 'medium', 'frontend', 'b.yaml'),
+  makeFinding('NW3001', 'high', 'payments', 'b.yaml'),
+  makeFinding('NW4001', 'medium', 'backend', 'c.yaml'),
   makeFinding('NW5001', 'info', 'monitoring', 'c.yaml'),
 ];
 
@@ -90,7 +90,7 @@ describe('formatTty – groupBy: namespace', () => {
 
   it('handles findings with empty namespace', () => {
     const findings = [
-      makeFinding('NW1001', 'error', ''), // no namespace
+      makeFinding('NW1001', 'high', ''), // no namespace
     ];
     const out = formatTty(findings, { groupBy: 'namespace' });
     expect(out).toContain('cluster-scoped');
@@ -112,14 +112,14 @@ describe('formatTty – groupBy: namespace', () => {
 // ─── groupBy: 'severity' ─────────────────────────────────────────────────────
 
 describe('formatTty – groupBy: severity', () => {
-  it('includes Errors section header', () => {
+  it('includes High section header', () => {
     const out = formatTty(SAMPLE, { groupBy: 'severity' });
-    expect(out).toContain('Errors');
+    expect(out).toContain('High');
   });
 
-  it('includes Warnings section header', () => {
+  it('includes Medium section header', () => {
     const out = formatTty(SAMPLE, { groupBy: 'severity' });
-    expect(out).toContain('Warnings');
+    expect(out).toContain('Medium');
   });
 
   it('includes Info section header', () => {
@@ -127,25 +127,25 @@ describe('formatTty – groupBy: severity', () => {
     expect(out).toContain('Info');
   });
 
-  it('Errors section appears before Warnings section', () => {
+  it('High section appears before Medium section', () => {
     const out = formatTty(SAMPLE, { groupBy: 'severity' });
-    const errIdx = out.indexOf('Errors');
-    const warnIdx = out.indexOf('Warnings');
-    expect(errIdx).toBeLessThan(warnIdx);
+    const highIdx = out.indexOf('High');
+    const medIdx = out.indexOf('Medium');
+    expect(highIdx).toBeLessThan(medIdx);
   });
 
-  it('Warnings section appears before Info section', () => {
+  it('Medium section appears before Info section', () => {
     const out = formatTty(SAMPLE, { groupBy: 'severity' });
-    const warnIdx = out.indexOf('Warnings');
+    const medIdx = out.indexOf('Medium');
     const infoIdx = out.indexOf('Info');
-    expect(warnIdx).toBeLessThan(infoIdx);
+    expect(medIdx).toBeLessThan(infoIdx);
   });
 
   it('omits a severity section when no findings exist for it', () => {
-    const errorsOnly = SAMPLE.filter((f) => f.severity === 'error');
-    const out = formatTty(errorsOnly, { groupBy: 'severity' });
-    expect(out).toContain('Errors');
-    expect(out).not.toContain('Warnings');
+    const highOnly = SAMPLE.filter((f) => f.severity === 'high');
+    const out = formatTty(highOnly, { groupBy: 'severity' });
+    expect(out).toContain('High');
+    expect(out).not.toContain('Medium');
     expect(out).not.toContain('Info');
   });
 
@@ -169,13 +169,13 @@ describe('formatTty – groupBy: rule', () => {
   });
 
   it('shows finding count in section header', () => {
-    const doubled = [...SAMPLE, makeFinding('NW1001', 'error', 'extra')];
+    const doubled = [...SAMPLE, makeFinding('NW1001', 'high', 'extra')];
     const out = formatTty(doubled, { groupBy: 'rule' });
     // NW1001 should show (2) since there are 2 findings for it
     expect(out).toMatch(/NW1001.*\(2\)/);
   });
 
-  it('error rules appear before warning rules', () => {
+  it('high rules appear before medium rules', () => {
     const out = formatTty(SAMPLE, { groupBy: 'rule' });
     const nw1001Idx = out.indexOf('NW1001');
     const nw2001Idx = out.indexOf('NW2001');
@@ -189,9 +189,9 @@ describe('formatTty – groupBy: rule', () => {
 
   it('single rule with multiple occurrences appears as one section', () => {
     const findings = [
-      makeFinding('NW1001', 'error', 'ns1', 'a.yaml'),
-      makeFinding('NW1001', 'error', 'ns2', 'b.yaml'),
-      makeFinding('NW1001', 'error', 'ns3', 'c.yaml'),
+      makeFinding('NW1001', 'high', 'ns1', 'a.yaml'),
+      makeFinding('NW1001', 'high', 'ns2', 'b.yaml'),
+      makeFinding('NW1001', 'high', 'ns3', 'c.yaml'),
     ];
     const out = formatTty(findings, { groupBy: 'rule' });
     const count = (out.match(/NW1001/g) ?? []).length;

@@ -63,7 +63,7 @@ function isEmptyObject(obj: unknown): boolean {
 /** NW4001: No default-deny NetworkPolicy in namespace */
 export const NW4001: Rule = {
   id: 'NW4001',
-  severity: 'warning',
+  severity: 'high',
   description: 'No default-deny NetworkPolicy in namespace',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -172,7 +172,7 @@ export const NW4002: Rule = {
 /** NW4003: Cross-namespace traffic not restricted */
 export const NW4003: Rule = {
   id: 'NW4003',
-  severity: 'warning',
+  severity: 'medium',
   description: 'Cross-namespace traffic not restricted',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
@@ -300,7 +300,7 @@ const METADATA_API_IP = '169.254.169.254';
 /** NW4005: MetadataAPI (169.254.169.254) not blocked in egress policies */
 export const NW4005: Rule = {
   id: 'NW4005',
-  severity: 'warning',
+  severity: 'high',
   description: 'Cloud metadata API (169.254.169.254) not blocked in egress NetworkPolicies',
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];

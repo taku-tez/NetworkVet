@@ -117,7 +117,7 @@ describe('NW7001 — AWS NLB without internal annotation', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7001');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire when aws-load-balancer-internal: "true"', () => {
@@ -170,7 +170,7 @@ describe('NW7002 — AWS LB access logs disabled', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7002');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('high');
   });
 
   it('does not fire when access logs enabled', () => {
@@ -205,7 +205,7 @@ describe('NW7003 — Public AWS LB without SSL cert', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7003');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire when ssl-cert annotation is set', () => {
@@ -270,7 +270,7 @@ describe('NW7005 — ALB Ingress without scheme annotation', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7005');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('fires for ALB Ingress with scheme: internet-facing', () => {
@@ -317,7 +317,7 @@ describe('NW7006 — ALB Ingress without security group', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7006');
-    expect(findings[0].severity).toBe('error');
+    expect(findings[0].severity).toBe('high');
   });
 
   it('does not fire when security-groups annotation is set', () => {
@@ -350,7 +350,7 @@ describe('NW7007 — ALB Ingress TLS without ssl-policy', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7007');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('low');
   });
 
   it('does not fire when ssl-policy is set', () => {
@@ -415,7 +415,7 @@ describe('NW7009 — GKE LB without internal annotation', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7009');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire when networking.gke.io/load-balancer-type: Internal', () => {
@@ -459,7 +459,7 @@ describe('NW7010 — GCE Ingress HTTP not disabled', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7010');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('fires when allow-http is set to "true"', () => {
@@ -541,7 +541,7 @@ describe('NW7012 — GKE BackendConfig without Cloud Armor', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7012');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire when securityPolicy is set', () => {
@@ -574,7 +574,7 @@ describe('NW7013 — AKS LB explicitly internet-facing', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7013');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire when azure-load-balancer-internal: "true"', () => {
@@ -647,7 +647,7 @@ describe('NW7015 — Azure App Gateway Ingress without WAF', () => {
     const findings = rule.check([r], makeCtx([r]));
     expect(findings).toHaveLength(1);
     expect(findings[0].id).toBe('NW7015');
-    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].severity).toBe('medium');
   });
 
   it('does not fire when appgw waf-policy-for-path is set', () => {

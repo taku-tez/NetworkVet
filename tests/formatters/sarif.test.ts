@@ -5,7 +5,7 @@ import type { Finding } from '../../src/types.js';
 const sampleFindings: Finding[] = [
   {
     id: 'NW1001',
-    severity: 'error',
+    severity: 'high',
     kind: 'NetworkPolicy',
     name: 'allow-all',
     namespace: 'default',
@@ -16,7 +16,7 @@ const sampleFindings: Finding[] = [
   },
   {
     id: 'NW2001',
-    severity: 'warning',
+    severity: 'medium',
     kind: 'Service',
     name: 'my-nodeport',
     namespace: 'production',
@@ -79,7 +79,7 @@ describe('formatSarif', () => {
     const findings: Finding[] = [
       {
         id: 'NW1001',
-        severity: 'error',
+        severity: 'high',
         kind: 'NetworkPolicy',
         name: 'p1',
         namespace: 'ns1',
@@ -89,7 +89,7 @@ describe('formatSarif', () => {
       },
       {
         id: 'NW1001',
-        severity: 'error',
+        severity: 'high',
         kind: 'NetworkPolicy',
         name: 'p2',
         namespace: 'ns2',
@@ -104,17 +104,17 @@ describe('formatSarif', () => {
     expect(nw1001Rules).toHaveLength(1);
   });
 
-  it('maps error severity to SARIF level "error"', () => {
+  it('maps high severity to SARIF level "error"', () => {
     const findings: Finding[] = [
       {
         id: 'NW1001',
-        severity: 'error',
+        severity: 'high',
         kind: 'NetworkPolicy',
         name: 'p1',
         namespace: 'default',
         file: 'test.yaml',
         line: 1,
-        message: 'error finding',
+        message: 'high finding',
       },
     ];
     const parsed = JSON.parse(formatSarif(findings));
@@ -122,17 +122,17 @@ describe('formatSarif', () => {
     expect(result.level).toBe('error');
   });
 
-  it('maps warning severity to SARIF level "warning"', () => {
+  it('maps medium severity to SARIF level "warning"', () => {
     const findings: Finding[] = [
       {
         id: 'NW2001',
-        severity: 'warning',
+        severity: 'medium',
         kind: 'Service',
         name: 's1',
         namespace: 'default',
         file: 'test.yaml',
         line: 1,
-        message: 'warning finding',
+        message: 'medium finding',
       },
     ];
     const parsed = JSON.parse(formatSarif(findings));
@@ -169,7 +169,7 @@ describe('formatSarif', () => {
     const findings: Finding[] = [
       {
         id: 'NW1001',
-        severity: 'error',
+        severity: 'high',
         kind: 'NetworkPolicy',
         name: 'p1',
         namespace: 'default',

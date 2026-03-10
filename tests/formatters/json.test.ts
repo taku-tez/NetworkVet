@@ -5,7 +5,7 @@ import type { Finding } from '../../src/types.js';
 const sampleFindings: Finding[] = [
   {
     id: 'NW1001',
-    severity: 'error',
+    severity: 'high',
     kind: 'NetworkPolicy',
     name: 'allow-all',
     namespace: 'default',
@@ -16,7 +16,7 @@ const sampleFindings: Finding[] = [
   },
   {
     id: 'NW2001',
-    severity: 'warning',
+    severity: 'medium',
     kind: 'Service',
     name: 'my-nodeport',
     namespace: 'production',
@@ -46,8 +46,8 @@ describe('formatJson', () => {
   it('includes summary with correct counts', () => {
     const parsed = JSON.parse(formatJson(sampleFindings));
     expect(parsed.summary.total).toBe(2);
-    expect(parsed.summary.errors).toBe(1);
-    expect(parsed.summary.warnings).toBe(1);
+    expect(parsed.summary.high).toBe(1);
+    expect(parsed.summary.medium).toBe(1);
     expect(parsed.summary.infos).toBe(0);
   });
 
@@ -60,7 +60,7 @@ describe('formatJson', () => {
     const parsed = JSON.parse(formatJson(sampleFindings));
     const finding = parsed.findings[0];
     expect(finding.id).toBe('NW1001');
-    expect(finding.severity).toBe('error');
+    expect(finding.severity).toBe('high');
     expect(finding.kind).toBe('NetworkPolicy');
     expect(finding.name).toBe('allow-all');
     expect(finding.namespace).toBe('default');
@@ -74,8 +74,10 @@ describe('formatJson', () => {
     const parsed = JSON.parse(formatJson([]));
     expect(parsed.findings).toHaveLength(0);
     expect(parsed.summary.total).toBe(0);
-    expect(parsed.summary.errors).toBe(0);
-    expect(parsed.summary.warnings).toBe(0);
+    expect(parsed.summary.critical).toBe(0);
+    expect(parsed.summary.high).toBe(0);
+    expect(parsed.summary.medium).toBe(0);
+    expect(parsed.summary.low).toBe(0);
     expect(parsed.summary.infos).toBe(0);
   });
 
@@ -94,8 +96,10 @@ describe('formatJson', () => {
     ];
     const parsed = JSON.parse(formatJson(findings));
     expect(parsed.summary.infos).toBe(1);
-    expect(parsed.summary.errors).toBe(0);
-    expect(parsed.summary.warnings).toBe(0);
+    expect(parsed.summary.critical).toBe(0);
+    expect(parsed.summary.high).toBe(0);
+    expect(parsed.summary.medium).toBe(0);
+    expect(parsed.summary.low).toBe(0);
   });
 
   it('outputs pretty-printed JSON', () => {
@@ -109,7 +113,7 @@ describe('formatJson', () => {
     const findings: Finding[] = [
       {
         id: 'NW2001',
-        severity: 'warning',
+        severity: 'medium',
         kind: 'Service',
         name: 'svc',
         namespace: 'default',
