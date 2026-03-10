@@ -1,0 +1,117 @@
+---
+# NW7009: GKE LoadBalancer without internal annotation — should fire warning
+apiVersion: v1
+kind: Service
+metadata:
+  name: gke-external-lb
+  namespace: production
+  annotations:
+    cloud.google.com/backend-config: '{"default":"my-backendconfig"}'
+spec:
+  type: LoadBalancer
+  selector:
+    app: api
+  ports:
+    - port: 443
+      targetPort: 8443
+---
+# NW7010: GCE Ingress without HTTP disabled — should fire warning
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gce-ingress-http-allowed
+  namespace: production
+  annotations:
+    kubernetes.io/ingress.class: gce
+spec:
+  tls:
+    - secretName: tls-secret
+  rules:
+    - host: app.example.com
+      http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80
+---
+# NW7011: GKE LB without cloud.google.com/load-balancer-type — should fire info
+# (This only fires when GCP is positively detected — gke-external-lb above has cloud.google.com annotation)
+apiVersion: v1
+kind: Service
+metadata:
+  name: gke-lb-no-type-annotation
+  namespace: staging
+spec:
+  type: LoadBalancer
+  selector:
+    app: staging-app
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+# NW7012: BackendConfig without securityPolicy — should fire warning
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: no-armor-backendconfig
+  namespace: production
+spec:
+  timeoutSec: 40
+  connectionDraining:
+    drainingTimeoutSec: 60
+---
+# Clean GCE Ingress: HTTP disabled — should NOT fire NW7010
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: clean-gce-ingress
+  namespace: production
+  annotations:
+    kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  tls:
+    - secretName: tls-secret
+  rules:
+    - host: secure.example.com
+      http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80
+---
+# Clean GKE LB: with Internal annotation — should NOT fire NW7009/NW7011
+apiVersion: v1
+kind: Service
+metadata:
+  name: clean-internal-gke-lb
+  namespace: production
+  annotations:
+    networking.gke.io/load-balancer-type: Internal
+    cloud.google.com/load-balancer-type: Internal
+spec:
+  type: LoadBalancer
+  selector:
+    app: internal-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+# Clean BackendConfig: with securityPolicy — should NOT fire NW7012
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: armor-enabled-backendconfig
+  namespace: production
+spec:
+  securityPolicy:
+    name: my-cloud-armor-policy
+  timeoutSec: 40

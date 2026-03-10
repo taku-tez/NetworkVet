@@ -1,0 +1,147 @@
+---
+# NW6001: fromEntities: ["world"] — should fire error
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: world-ingress
+  namespace: ingress-public
+spec:
+  endpointSelector:
+    matchLabels:
+      app: public-api
+  ingress:
+    - fromEntities:
+        - world
+---
+# NW6002: toEntities: ["world"] — should fire warning
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: world-egress
+  namespace: data-pipeline
+spec:
+  endpointSelector:
+    matchLabels:
+      app: scraper
+  egress:
+    - toEntities:
+        - world
+---
+# NW6003: fromEntities: ["all"] — should fire error
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: all-entity-ingress
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app: prometheus
+  ingress:
+    - fromEntities:
+        - all
+---
+# NW6004: empty endpointSelector — should fire info
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: empty-selector
+  namespace: default
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEntities:
+        - cluster
+---
+# NW6005: fromCIDR 0.0.0.0/0 — should fire error
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: any-cidr-ingress
+  namespace: frontend
+spec:
+  endpointSelector:
+    matchLabels:
+      app: web
+  ingress:
+    - fromCIDR:
+        - 0.0.0.0/0
+---
+# NW6006: CiliumClusterwideNetworkPolicy with no nodeSelector — should fire warning
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: cluster-wide-no-node-selector
+spec:
+  endpointSelector:
+    matchLabels:
+      reserved.node: ""
+  ingress:
+    - fromEntities:
+        - cluster
+---
+# NW6007: toFQDNs matchPattern: "*" — should fire warning
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: wildcard-fqdn
+  namespace: data-pipeline
+spec:
+  endpointSelector:
+    matchLabels:
+      app: crawler
+  egress:
+    - toFQDNs:
+        - matchPattern: "*"
+---
+# NW6008: L7 HTTP rules — should fire info
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: l7-http-policy
+  namespace: api
+spec:
+  endpointSelector:
+    matchLabels:
+      app: api-server
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: frontend
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /api/v1/.*
+              - method: POST
+                path: /api/v1/orders
+---
+# Clean Cilium policy — should NOT fire
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: clean-policy
+  namespace: backend
+spec:
+  endpointSelector:
+    matchLabels:
+      app: backend-api
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: frontend
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app: postgres
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP

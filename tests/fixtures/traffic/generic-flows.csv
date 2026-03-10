@@ -1,0 +1,23 @@
+# NetworkVet generic traffic log — CSV format
+# Fields: timestamp,src_ns,src_pod,dst_ns,dst_pod,dst_port,protocol,verdict
+timestamp,src_ns,src_pod,dst_ns,dst_pod,dst_port,protocol,verdict
+2024-01-15T10:00:00Z,frontend,frontend-app-abc,payments,payments-svc-xyz,8080,TCP,ALLOW
+2024-01-15T10:00:01Z,frontend,frontend-app-abc,payments,payments-svc-xyz,8080,TCP,ALLOW
+2024-01-15T10:00:02Z,backend,api-server-123,monitoring,prometheus-0,9090,TCP,ALLOW
+2024-01-15T10:00:03Z,worker,worker-pod-456,default,redis-0,6379,TCP,ALLOW
+2024-01-15T10:00:04Z,worker,worker-pod-456,default,redis-0,6379,TCP,ALLOW
+2024-01-15T10:00:05Z,worker,worker-pod-456,default,redis-0,6379,TCP,ALLOW
+2024-01-15T10:00:06Z,attacker,malicious-pod,kube-system,kube-apiserver,6443,TCP,DROP
+2024-01-15T10:00:07Z,external,unknown-pod,backend,api-server-123,443,TCP,DROP
+2024-01-15T10:00:08Z,frontend,frontend-app-abc,database,postgres-0,5432,TCP,DROP
+2024-01-15T10:00:09Z,backend,api-server-123,payments,payments-svc-xyz,8080,TCP,ALLOW
+2024-01-15T10:00:10Z,backend,api-server-123,database,postgres-0,5432,TCP,ALLOW
+2024-01-15T10:00:11Z,payments,payments-api,audit,audit-logger,9200,TCP,ALLOW
+2024-01-15T10:00:12Z,frontend,frontend-app-abc,cdn,,443,TCP,ALLOW
+2024-01-15T10:00:13Z,backend,worker-replica,cache,memcached-0,11211,TCP,ALLOW
+2024-01-15T10:00:14Z,worker,worker-pod-456,messaging,rabbitmq-0,5672,TCP,ALLOW
+2024-01-15T10:00:15Z,frontend,frontend-app-xyz,billing,billing-svc,3000,TCP,ALLOW
+2024-01-15T10:00:16Z,monitoring,grafana-0,backend,api-server-123,8080,TCP,ALLOW
+2024-01-15T10:00:17Z,backend,api-server-123,search,elasticsearch-0,9200,TCP,ALLOW
+2024-01-15T10:00:18Z,payments,payments-worker,queue,kafka-0,9092,TCP,ALLOW
+2024-01-15T10:00:19Z,frontend,frontend-app-abc,payments,payments-svc-xyz,8080,TCP,ALLOW

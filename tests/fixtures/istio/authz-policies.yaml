@@ -1,0 +1,100 @@
+---
+# NW5001: principals: ["*"] — should fire error
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-all-principals
+  namespace: production
+spec:
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals: ["*"]
+---
+# NW5003: methods: ["*"] — should fire warning
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-all-methods
+  namespace: production
+spec:
+  selector:
+    matchLabels:
+      app: api-server
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces: ["frontend"]
+      to:
+        - operation:
+            methods: ["*"]
+---
+# NW5005: PERMISSIVE mTLS — should fire warning
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: permissive-mtls
+  namespace: staging
+spec:
+  mtls:
+    mode: PERMISSIVE
+---
+# NW5006: DISABLE mTLS — should fire error
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: disabled-mtls
+  namespace: legacy
+spec:
+  mtls:
+    mode: DISABLE
+---
+# NW5007: no selector (namespace-wide) — should fire info
+# NW5008: no namespace restriction — should fire warning
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: no-namespace-restriction
+  namespace: payments
+spec:
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/frontend/sa/frontend-sa"
+---
+# Clean policy: should NOT fire any rules
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: clean-policy
+  namespace: payments
+spec:
+  selector:
+    matchLabels:
+      app: checkout
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/frontend/sa/frontend-sa"
+            namespaces:
+              - "frontend"
+      to:
+        - operation:
+            methods: ["POST"]
+            paths: ["/checkout"]
+---
+# Clean PeerAuthentication: STRICT mode
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: strict-mtls
+  namespace: payments
+spec:
+  mtls:
+    mode: STRICT

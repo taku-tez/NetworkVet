@@ -1,0 +1,24 @@
+# Source files (TypeScript)
+src/
+tests/
+
+# TypeScript config
+tsconfig.json
+*.test.ts
+
+# Development tooling
+.gitignore
+.eslintrc*
+.prettierrc*
+vitest.config.*
+
+# CI / GitHub
+.github/
+
+# Local dev artifacts
+*.log
+.DS_Store
+node_modules/
+
+# Baseline files
+.networkvet-baseline.json

@@ -1,0 +1,79 @@
+{
+  "name": "networkvet",
+  "version": "0.10.0",
+  "description": "Kubernetes network security analyzer — detects NetworkPolicy, Istio AuthorizationPolicy, Cilium NetworkPolicy, cloud provider firewall misconfigurations, real-time traffic policy violations, OPA/Rego policy export, and admission webhook validation",
+  "bin": {
+    "networkvet": "./dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test",
+    "publish:dry": "npm pack --dry-run"
+  },
+  "keywords": [
+    "kubernetes",
+    "k8s",
+    "network-policy",
+    "security",
+    "istio",
+    "cilium",
+    "lint",
+    "analyzer",
+    "cli",
+    "devops",
+    "networking",
+    "authorization-policy",
+    "service-mesh",
+    "aws",
+    "gcp",
+    "azure",
+    "eks",
+    "gke",
+    "aks",
+    "firewall",
+    "cloud-security",
+    "opa",
+    "rego",
+    "gatekeeper",
+    "conftest",
+    "admission-webhook",
+    "validating-webhook"
+  ],
+  "author": "NetworkVet Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NetworkVet/networkvet.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NetworkVet/networkvet/issues"
+  },
+  "homepage": "https://github.com/NetworkVet/networkvet#readme",
+  "dependencies": {
+    "@kubernetes/client-node": "^1.4.0",
+    "chalk": "^5.3.0",
+    "glob": "^10.3.0",
+    "js-yaml": "^4.1.0",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.0.0",
+    "@types/yargs": "^17.0.33",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  }
+}
