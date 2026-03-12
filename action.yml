@@ -1,0 +1,88 @@
+name: 'NetworkVet'
+description: 'Kubernetes network security analysis — detect NetworkPolicy, Istio, Cilium, and cloud provider misconfigurations'
+author: 'NetworkVet Contributors'
+
+branding:
+  icon: 'shield'
+  color: 'red'
+
+inputs:
+  dir:
+    description: 'Directory containing Kubernetes manifests to scan'
+    required: false
+  file:
+    description: 'Single manifest file to scan'
+    required: false
+  format:
+    description: 'Output format: tty, json, sarif, compliance'
+    required: false
+    default: 'sarif'
+  output:
+    description: 'Path to write the output file (e.g. results.sarif)'
+    required: false
+    default: 'networkvet-results.sarif'
+  fail-on:
+    description: 'Minimum severity that causes a non-zero exit code (critical, high, medium, low, info)'
+    required: false
+    default: 'high'
+  ignore:
+    description: 'Comma-separated rule IDs to ignore globally (e.g. NW1001,NW2003)'
+    required: false
+  severity:
+    description: 'Only show findings at or above this severity level'
+    required: false
+  config:
+    description: 'Path to .networkvet.yaml config file'
+    required: false
+  version:
+    description: 'networkvet npm version to install (default: latest)'
+    required: false
+    default: 'latest'
+
+outputs:
+  sarif-file:
+    description: 'Path to the generated SARIF file (when format is sarif)'
+    value: ${{ steps.run.outputs.sarif-file }}
+  finding-count:
+    description: 'Total number of findings'
+    value: ${{ steps.run.outputs.finding-count }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install networkvet
+      shell: bash
+      run: npm install -g networkvet@${{ inputs.version }}
+
+    - name: Run networkvet
+      id: run
+      shell: bash
+      run: |
+        ARGS=""
+        if [ -n "${{ inputs.dir }}" ]; then ARGS="$ARGS --dir ${{ inputs.dir }}"; fi
+        if [ -n "${{ inputs.file }}" ]; then ARGS="$ARGS --file ${{ inputs.file }}"; fi
+        if [ -n "${{ inputs.ignore }}" ]; then ARGS="$ARGS --ignore ${{ inputs.ignore }}"; fi
+        if [ -n "${{ inputs.severity }}" ]; then ARGS="$ARGS --severity ${{ inputs.severity }}"; fi
+        if [ -n "${{ inputs.config }}" ]; then ARGS="$ARGS --config ${{ inputs.config }}"; fi
+        ARGS="$ARGS --format ${{ inputs.format }}"
+        ARGS="$ARGS --fail-on ${{ inputs.fail-on }}"
+        ARGS="$ARGS --output ${{ inputs.output }}"
+
+        networkvet $ARGS
+        EXIT_CODE=$?
+
+        echo "sarif-file=${{ inputs.output }}" >> $GITHUB_OUTPUT
+
+        if [ "${{ inputs.format }}" = "json" ] && [ -f "${{ inputs.output }}" ]; then
+          COUNT=$(cat "${{ inputs.output }}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('findings', [])))" 2>/dev/null || echo "0")
+          echo "finding-count=$COUNT" >> $GITHUB_OUTPUT
+        fi
+
+        exit $EXIT_CODE
+
+    - name: Upload SARIF to GitHub Code Scanning
+      if: inputs.format == 'sarif' && always()
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.output }}
+      continue-on-error: true

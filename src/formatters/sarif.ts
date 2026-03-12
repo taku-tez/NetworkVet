@@ -1,12 +1,33 @@
 import type { Finding } from '../types.js';
+import { getComplianceRefs, COMPLIANCE_MAP } from '../compliance/mapping.js';
 
 // SARIF 2.1.0 types (simplified)
+interface SarifTaxon {
+  id: string;
+  name: string;
+}
+
+interface SarifTaxonomy {
+  name: string;
+  version: string;
+  taxa: SarifTaxon[];
+}
+
+interface SarifRelationship {
+  target: {
+    id: string;
+    toolComponent: { name: string };
+  };
+  kinds: string[];
+}
+
 interface SarifRule {
   id: string;
   name: string;
   shortDescription: { text: string };
   helpUri?: string;
   properties?: { tags?: string[]; severity?: string };
+  relationships?: SarifRelationship[];
 }
 
 interface SarifLocation {
@@ -37,6 +58,7 @@ interface SarifTool {
 interface SarifRun {
   tool: SarifTool;
   results: SarifResult[];
+  taxonomies?: SarifTaxonomy[];
 }
 
 interface SarifLog {
@@ -61,7 +83,20 @@ export function formatSarif(findings: Finding[]): string {
   const rulesMap = new Map<string, SarifRule>();
   for (const f of findings) {
     if (!rulesMap.has(f.id)) {
-      rulesMap.set(f.id, {
+      const complianceRefs = getComplianceRefs(f.id);
+      const relationships: SarifRelationship[] = complianceRefs.map((ref) => ({
+        target: {
+          id: `${ref.framework}-${ref.id}`,
+          toolComponent: {
+            name: ref.framework === 'CIS'
+              ? 'CIS Kubernetes Benchmark v1.8.0'
+              : 'NSA/CISA Kubernetes Hardening Guide',
+          },
+        },
+        kinds: ['superset'],
+      }));
+
+      const rule: SarifRule = {
         id: f.id,
         name: ruleIdToName(f.id),
         shortDescription: { text: f.message },
@@ -70,9 +105,43 @@ export function formatSarif(findings: Finding[]): string {
           tags: ['security', 'kubernetes', 'network'],
           severity: f.severity,
         },
-      });
+      };
+      if (relationships.length > 0) {
+        rule.relationships = relationships;
+      }
+      rulesMap.set(f.id, rule);
     }
   }
+
+  // Build taxonomies from the full compliance map
+  const cisTaxaMap = new Map<string, string>();
+  const nsaTaxaMap = new Map<string, string>();
+  for (const refs of Object.values(COMPLIANCE_MAP)) {
+    for (const ref of refs) {
+      if (ref.framework === 'CIS') {
+        cisTaxaMap.set(ref.id, ref.title);
+      } else {
+        nsaTaxaMap.set(ref.id, ref.title);
+      }
+    }
+  }
+
+  const taxonomies: SarifTaxonomy[] = [
+    {
+      name: 'CIS Kubernetes Benchmark v1.8.0',
+      version: '1.8.0',
+      taxa: Array.from(cisTaxaMap.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([id, name]) => ({ id: `CIS-${id}`, name })),
+    },
+    {
+      name: 'NSA/CISA Kubernetes Hardening Guide',
+      version: '1.2',
+      taxa: Array.from(nsaTaxaMap.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([id, name]) => ({ id: `NSA-${id}`, name })),
+    },
+  ];
 
   const results: SarifResult[] = findings.map((f) => {
     const location: SarifLocation = {
@@ -119,6 +188,7 @@ export function formatSarif(findings: Finding[]): string {
           },
         },
         results,
+        taxonomies,
       },
     ],
   };

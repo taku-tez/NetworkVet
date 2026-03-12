@@ -3,6 +3,7 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import path from 'path';
 import { parseDir, parseFile } from './parser/index.js';
+import type { ParseOptions } from './parser/index.js';
 import { runRules } from './rules/engine.js';
 import { formatTty } from './formatters/tty.js';
 import { formatJson } from './formatters/json.js';
@@ -12,7 +13,11 @@ import { formatFixTty, formatFixJson } from './formatters/fix.js';
 import { formatDot } from './formatters/dot.js';
 import { formatDiffTty, formatDiffJson } from './formatters/diff.js';
 import { formatRegoTty, formatRegoAll, formatGatekeeperAll, formatConftestAll } from './formatters/rego.js';
+import { formatComplianceTty } from './formatters/compliance.js';
+import type { ComplianceFramework } from './formatters/compliance.js';
 import { computeReachability } from './reachability/evaluator.js';
+import { computePodReachability } from './reachability/pod_evaluator.js';
+import { formatPodMatrixTty, formatPodMatrixJson } from './formatters/pod_matrix.js';
 import { generateRegoForFindings } from './rego/index.js';
 import { loadConfig, mergeConfig } from './config/loader.js';
 import { benchmarkRules, formatTimings } from './perf/benchmark.js';
@@ -29,8 +34,12 @@ import type { Finding, ParsedResource } from './types.js';
 import type { ReachabilityResult } from './reachability/evaluator.js';
 import type { TrafficAnalysisResult } from './traffic/types.js';
 import type { TrafficLogFormat } from './traffic/types.js';
+import { mergeSimulatedResources, computeSimulationDiff } from './simulation/index.js';
+import { formatSimulationTty, formatSimulationJson } from './formatters/simulation.js';
+import { computeBlastRadius } from './blast/index.js';
+import { formatBlastRadiusTty, formatBlastRadiusJson } from './formatters/blast.js';
 
-type OutputFormat = 'tty' | 'json' | 'sarif' | 'matrix' | 'html' | 'dot' | 'rego' | 'gatekeeper' | 'conftest';
+type OutputFormat = 'tty' | 'json' | 'sarif' | 'matrix' | 'html' | 'dot' | 'rego' | 'gatekeeper' | 'conftest' | 'compliance';
 
 async function main(): Promise<void> {
   const argv = await yargs(hideBin(process.argv))
@@ -79,11 +88,21 @@ async function main(): Promise<void> {
       description: 'Compute and output namespace-level reachability matrix',
       default: false,
     })
+    .option('level', {
+      choices: ['namespace', 'pod'] as const,
+      default: 'namespace' as 'namespace' | 'pod',
+      description: 'Reachability analysis level: namespace (default) or pod (workload-level)',
+    })
     // --- Shared options ---
     .option('format', {
-      choices: ['tty', 'json', 'sarif', 'matrix', 'html', 'dot', 'rego', 'gatekeeper', 'conftest'] as const,
+      choices: ['tty', 'json', 'sarif', 'matrix', 'html', 'dot', 'rego', 'gatekeeper', 'conftest', 'compliance'] as const,
       default: 'tty' as OutputFormat,
       description: 'Output format (matrix, html, and dot imply --reachability; rego/gatekeeper/conftest export OPA policies)',
+    })
+    .option('compliance', {
+      choices: ['cis', 'nsa', 'all'] as const,
+      default: 'all' as ComplianceFramework,
+      description: 'Compliance framework filter for --format compliance (cis, nsa, or all)',
     })
     .option('ignore', {
       alias: 'i',
@@ -157,6 +176,20 @@ async function main(): Promise<void> {
       type: 'string',
       description: 'Path to .networkvet.yaml config file (auto-discovered if not specified)',
     })
+    // --- Helm options ---
+    .option('helm-values', {
+      type: 'string',
+      description: 'Path to a Helm values.yaml file for resolving {{ .Values.xxx }} template expressions',
+    })
+    .option('helm-release-name', {
+      type: 'string',
+      default: 'release',
+      description: 'Helm release name used to resolve {{ .Release.Name }} (default: release)',
+    })
+    .option('helm-release-namespace', {
+      type: 'string',
+      description: 'Helm release namespace used to resolve {{ .Release.Namespace }}',
+    })
     // --- Output filtering ---
     .option('severity', {
       choices: ['critical', 'high', 'medium', 'low', 'info'] as const,
@@ -177,13 +210,31 @@ async function main(): Promise<void> {
       description: 'Print per-rule timing and resource count to stderr',
       default: false,
     })
+    .option('fail-on', {
+      choices: ['critical', 'high', 'medium', 'low', 'info'] as const,
+      default: 'high' as Finding['severity'],
+      description: 'Minimum severity that causes a non-zero exit code (default: high)',
+    })
+    .option('output', {
+      alias: 'o',
+      type: 'string',
+      description: 'Write output to a file instead of (or in addition to) stdout',
+    })
+    .option('simulate', {
+      type: 'string',
+      description: 'Path to a YAML file to simulate applying; shows reachability changes (gained/lost paths)',
+    })
+    .option('blast-radius', {
+      type: 'string',
+      description: 'Compute blast radius for a workload (format: namespace/name or name). Shows all reachable workloads via BFS.',
+    })
     .option('no-color', {
       type: 'boolean',
       description: 'Disable color output',
     })
     .help()
     .alias('help', 'h')
-    .version('0.10.0')
+    .version('0.19.0')
     .alias('version', 'v')
     .example('$0 --dir ./k8s', 'Scan all YAML files in the k8s directory')
     .example('$0 --dir ./k8s --format json', 'Output findings as JSON')
@@ -199,11 +250,15 @@ async function main(): Promise<void> {
     .example('$0 --dir ./k8s --format conftest', 'Export Conftest-compatible Rego policies')
     .example('$0 --webhook --webhook-port 8443 --webhook-deny-on-error', 'Run as validating webhook server')
     .example('$0 --webhook-manifest', 'Print Kubernetes deployment manifest for webhook')
+    .example('$0 --dir ./k8s --format compliance', 'Show CIS/NSA compliance report')
+    .example('$0 --dir ./k8s --format compliance --compliance cis', 'Show CIS Benchmark findings only')
     .example('$0 --dir ./k8s --config ./myconfig.yaml', 'Use a specific config file')
     .example('$0 --dir ./k8s --severity high', 'Only show high and critical findings')
     .example('$0 --dir ./k8s --group-by namespace', 'Group output by namespace')
     .example('$0 --dir ./k8s --rule NW1001,NW2001', 'Show findings for specific rules only')
     .example('$0 --dir ./k8s --verbose', 'Show per-rule timing statistics')
+    .example('$0 --dir ./k8s --fail-on medium', 'Exit 1 when any medium/high/critical finding exists')
+    .example('$0 --dir ./k8s --format sarif --output results.sarif', 'Write SARIF results to file')
     .parse();
 
   const clusterMode = argv.cluster as boolean;
@@ -227,10 +282,16 @@ async function main(): Promise<void> {
   const webhookDenyOnError = argv['webhook-deny-on-error'] as boolean;
   const wantWebhookManifest = argv['webhook-manifest'] as boolean;
   const configPath = argv.config as string | undefined;
+  const helmValuesPath = argv['helm-values'] as string | undefined;
+  const helmReleaseName = argv['helm-release-name'] as string;
+  const helmReleaseNamespace = argv['helm-release-namespace'] as string | undefined;
   const severityFilter = argv.severity as 'critical' | 'high' | 'medium' | 'low' | 'info' | undefined;
   const ruleFilter = argv.rule as string | undefined;
   const groupBy = argv['group-by'] as GroupBy;
   const wantVerbose = argv.verbose as boolean;
+  const reachabilityLevel = argv.level as 'namespace' | 'pod';
+  const simulateArg = argv.simulate as string | undefined;
+  const blastRadiusArg = argv['blast-radius'] as string | undefined;
 
   // matrix, html, and dot formats imply --reachability
   const wantReachability =
@@ -321,7 +382,44 @@ async function main(): Promise<void> {
       if (fileArg) {
         resources = parseFile(path.resolve(fileArg));
       } else {
-        resources = await parseDir(path.resolve(dirArg!));
+        // Build Helm options if any Helm flags were provided
+        let parseOpts: ParseOptions | undefined;
+        if (helmValuesPath || helmReleaseNamespace || helmReleaseName !== 'release') {
+          const helmValues: import('./helm/detector.js').HelmValues = {
+            release: {
+              Name: helmReleaseName,
+              ...(helmReleaseNamespace ? { Namespace: helmReleaseNamespace } : {}),
+            },
+          };
+          if (helmValuesPath) {
+            try {
+              const { readFileSync } = await import('fs');
+              const valuesContent = readFileSync(helmValuesPath, 'utf-8');
+              const { default: jsyaml } = await import('js-yaml');
+              const loaded = jsyaml.load(valuesContent);
+              if (loaded && typeof loaded === 'object' && !Array.isArray(loaded)) {
+                helmValues.values = loaded as Record<string, unknown>;
+              }
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              console.error(`Error loading helm-values file: ${message}`);
+              process.exit(2);
+            }
+          }
+          parseOpts = { helmValues };
+        }
+
+        const result = await parseDir(path.resolve(dirArg!), parseOpts);
+        resources = result.resources;
+
+        if (wantVerbose && result.skippedHelmFiles.length > 0) {
+          process.stderr.write(
+            `Skipped ${result.skippedHelmFiles.length} file(s) with unresolved Helm templates:\n`
+          );
+          for (const f of result.skippedHelmFiles) {
+            process.stderr.write(`  ${f}\n`);
+          }
+        }
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -332,6 +430,49 @@ async function main(): Promise<void> {
 
   if (resources.length === 0) {
     console.error('No Kubernetes resources found in the specified location');
+    process.exit(0);
+  }
+
+  // ---- Simulation mode --------------------------------------------------
+  if (simulateArg) {
+    try {
+      const simulatedResources = parseFile(path.resolve(simulateArg));
+      const merged = mergeSimulatedResources(resources, simulatedResources);
+      const before = computePodReachability(resources);
+      const after = computePodReachability(merged);
+      const simDiff = computeSimulationDiff(before, after);
+      const simOutput =
+        format === 'json'
+          ? formatSimulationJson(simDiff, simulateArg)
+          : formatSimulationTty(simDiff, simulateArg);
+      console.log(simOutput);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`Error running simulation: ${message}`);
+      process.exit(2);
+    }
+  }
+
+  // ---- Blast radius mode ------------------------------------------------
+  if (blastRadiusArg) {
+    try {
+      const blastResult = computeBlastRadius(resources, blastRadiusArg);
+      const blastOutput =
+        format === 'json'
+          ? formatBlastRadiusJson(blastResult)
+          : formatBlastRadiusTty(blastResult);
+      const outputFile = argv.output as string | undefined;
+      if (outputFile) {
+        const { writeFileSync } = await import('fs');
+        writeFileSync(outputFile, blastOutput, 'utf8');
+      } else {
+        console.log(blastOutput);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`Error computing blast radius: ${message}`);
+      process.exit(2);
+    }
     process.exit(0);
   }
 
@@ -408,8 +549,23 @@ async function main(): Promise<void> {
 
   // Optionally compute reachability
   let reachability: ReachabilityResult | undefined;
-  if (wantReachability) {
+  if (wantReachability && reachabilityLevel !== 'pod') {
     reachability = computeReachability(resources);
+  }
+
+  // Pod-level reachability
+  const wantPodReachability =
+    (argv.reachability as boolean) && reachabilityLevel === 'pod';
+  let podReachabilityOutput: string | undefined;
+  if (wantPodReachability) {
+    const podResults = computePodReachability(resources);
+    if (format === 'json') {
+      podReachabilityOutput = formatPodMatrixJson(podResults);
+    } else {
+      podReachabilityOutput = formatPodMatrixTty(podResults, {
+        namespace: namespaceArg,
+      });
+    }
   }
 
   // ---- Traffic log analysis ---------------------------------------------
@@ -485,11 +641,17 @@ async function main(): Promise<void> {
       output = formatConftestAll(policies);
       break;
     }
+    case 'compliance':
+      output = formatComplianceTty(displayFindings, argv.compliance as ComplianceFramework);
+      break;
     case 'tty':
     default:
       output = formatTty(displayFindings, { groupBy });
       if (reachability) {
         output += '\n\n' + formatMatrix(reachability);
+      }
+      if (podReachabilityOutput) {
+        output += '\n\n' + podReachabilityOutput;
       }
       if (trafficResult) {
         output += '\n\n' + formatTrafficTty(trafficResult);
@@ -497,14 +659,28 @@ async function main(): Promise<void> {
       break;
   }
 
-  // For JSON format, merge traffic analysis into the JSON output
-  if (format === 'json' && trafficResult) {
+  // For JSON format, merge pod reachability and traffic analysis into the JSON output
+  if (format === 'json' && (podReachabilityOutput || trafficResult)) {
     const parsed = JSON.parse(output) as Record<string, unknown>;
-    parsed.trafficAnalysis = trafficResult;
+    if (podReachabilityOutput) {
+      parsed.podReachability = JSON.parse(podReachabilityOutput);
+    }
+    if (trafficResult) {
+      parsed.trafficAnalysis = trafficResult;
+    }
     output = JSON.stringify(parsed, null, 2);
   }
 
   console.log(output);
+
+  const outputFile = argv.output as string | undefined;
+  if (outputFile) {
+    const { writeFileSync } = await import('fs');
+    writeFileSync(outputFile, output, 'utf8');
+    if (format === 'tty') {
+      process.stderr.write(`Output written to ${outputFile}\n`);
+    }
+  }
 
   // Optionally generate and output fix suggestions
   if (wantFix) {
@@ -513,9 +689,11 @@ async function main(): Promise<void> {
     console.log('\n' + fixOutput);
   }
 
-  // Exit with code 1 if any errors were found (using unfiltered findings so --severity filter
-  // doesn't suppress the exit code), or if any traffic violations at error severity
-  const hasErrors = findings.some((f) => f.severity === 'critical' || f.severity === 'high') ||
+  // Exit with code 1 if any errors were found at or above --fail-on severity threshold
+  // (using unfiltered findings so --severity filter doesn't suppress the exit code)
+  const failOnSeverity = argv['fail-on'] as Finding['severity'];
+  const failThreshold = SEVERITY_RANK[failOnSeverity] ?? 1;
+  const hasErrors = findings.some((f) => (SEVERITY_RANK[f.severity] ?? 4) <= failThreshold) ||
     (trafficResult?.violations.some((v) => v.severity === 'error') ?? false);
   process.exit(hasErrors ? 1 : 0);
 }

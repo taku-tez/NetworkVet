@@ -376,3 +376,120 @@ describe('generateFixes — port auto-detection', () => {
     expect(s.fix).toMatch(/port: 5000/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// NW5xxx / NW6xxx / NW7xxx rules
+// ---------------------------------------------------------------------------
+
+describe('generateFixes — NW5xxx/NW6xxx/NW7xxx rules', () => {
+  function findingFor(id: string, namespace = 'istio-system'): Finding {
+    return {
+      id,
+      severity: 'high',
+      kind: 'AuthorizationPolicy',
+      name: 'test-policy',
+      namespace,
+      file: 'test.yaml',
+      line: 1,
+      message: `Test finding for ${id}`,
+    };
+  }
+
+  it('NW5001 — returns fix with principals YAML', () => {
+    const suggestions = generateFixes([findingFor('NW5001')], []);
+    expect(suggestions).toHaveLength(1);
+    expect(suggestions[0].fix).toContain('principals');
+  });
+
+  it('NW5005 — returns fix with STRICT mTLS YAML', () => {
+    const suggestions = generateFixes([findingFor('NW5005')], []);
+    expect(suggestions[0].fix).toContain('STRICT');
+  });
+
+  it('NW5006 — returns fix to enable mTLS', () => {
+    const suggestions = generateFixes([findingFor('NW5006')], []);
+    expect(suggestions[0].fix).toContain('STRICT');
+  });
+
+  it('NW5007 — returns fix with selector', () => {
+    const suggestions = generateFixes([findingFor('NW5007')], []);
+    expect(suggestions[0].fix).toContain('matchLabels');
+  });
+
+  it('NW6001 — returns fix with fromCIDR', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW6001'), kind: 'CiliumNetworkPolicy' }], []);
+    expect(suggestions[0].fix).toContain('fromCIDR');
+  });
+
+  it('NW6003 — returns fix replacing "all" entity', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW6003'), kind: 'CiliumNetworkPolicy' }], []);
+    expect(suggestions[0].fix).toContain('cluster');
+  });
+
+  it('NW6005 — returns fix with specific CIDRs', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW6005'), kind: 'CiliumNetworkPolicy' }], []);
+    expect(suggestions[0].fix).toContain('fromCIDR');
+  });
+
+  it('NW6007 — returns fix with specific FQDN pattern', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW6007'), kind: 'CiliumNetworkPolicy' }], []);
+    expect(suggestions[0].fix).toContain('toFQDNs');
+  });
+
+  it('NW6008 — returns description without YAML fix (informational)', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW6008'), kind: 'CiliumNetworkPolicy' }], []);
+    expect(suggestions).toHaveLength(1);
+    expect(suggestions[0].description).toBeTruthy();
+    expect(suggestions[0].fix).toBeUndefined();
+  });
+
+  it('NW7001 — returns fix with internal annotation', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW7001', 'default'), kind: 'Service' }], []);
+    expect(suggestions[0].fix).toContain('aws-load-balancer-internal');
+  });
+
+  it('NW7002 — returns fix enabling access logs', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW7002', 'default'), kind: 'Service' }], []);
+    expect(suggestions[0].fix).toContain('access-log-enabled');
+  });
+
+  it('NW7003 — returns fix with SSL cert annotation', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW7003', 'default'), kind: 'Service' }], []);
+    expect(suggestions[0].fix).toContain('ssl-cert');
+  });
+
+  it('NW7006 — returns fix with security-groups annotation', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW7006', 'default'), kind: 'Ingress' }], []);
+    expect(suggestions[0].fix).toContain('security-groups');
+  });
+
+  it('NW7009 — returns fix with GKE internal annotation', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW7009', 'default'), kind: 'Service' }], []);
+    expect(suggestions[0].fix).toContain('load-balancer-type');
+  });
+
+  it('NW7010 — returns fix disabling HTTP', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW7010', 'default'), kind: 'Ingress' }], []);
+    expect(suggestions[0].fix).toContain('allow-http');
+  });
+
+  it('NW7012 — returns fix with Cloud Armor securityPolicy', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW7012', 'default'), kind: 'BackendConfig' }], []);
+    expect(suggestions[0].fix).toContain('securityPolicy');
+  });
+
+  it('NW7015 — returns fix with WAF policy annotation', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW7015', 'default'), kind: 'Ingress' }], []);
+    expect(suggestions[0].fix).toContain('waf-policy');
+  });
+
+  it('returns Japanese description when lang=ja for NW5001', () => {
+    const suggestions = generateFixes([findingFor('NW5001')], [], 'ja');
+    expect(suggestions[0].description).toContain('サービスアカウント');
+  });
+
+  it('returns Japanese description when lang=ja for NW7001', () => {
+    const suggestions = generateFixes([{ ...findingFor('NW7001', 'default'), kind: 'Service' }], [], 'ja');
+    expect(suggestions[0].description).toContain('NLB');
+  });
+});

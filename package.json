@@ -1,6 +1,6 @@
 {
   "name": "networkvet",
-  "version": "0.10.0",
+  "version": "0.19.0",
   "description": "Kubernetes network security analyzer — detects NetworkPolicy, Istio AuthorizationPolicy, Cilium NetworkPolicy, cloud provider firewall misconfigurations, real-time traffic policy violations, OPA/Rego policy export, and admission webhook validation",
   "bin": {
     "networkvet": "./dist/cli.js"

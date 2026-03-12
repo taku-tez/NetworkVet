@@ -3,6 +3,12 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { glob } from 'glob';
 import type { ParsedResource, K8sMetadata } from '../types.js';
+import { hasHelmTemplates, resolveHelmTemplates } from '../helm/detector.js';
+import type { HelmValues } from '../helm/detector.js';
+
+export interface ParseOptions {
+  helmValues?: HelmValues;
+}
 
 interface RawK8sDoc {
   kind?: string;
@@ -132,22 +138,48 @@ function walkDir(dir: string): string[] {
 
 /**
  * Recursively parse all YAML files in a directory (async, uses glob).
+ * Returns parsed resources and a list of files skipped due to unresolved Helm templates.
  */
-export async function parseDir(dir: string): Promise<ParsedResource[]> {
+export async function parseDir(
+  dir: string,
+  opts?: ParseOptions
+): Promise<{ resources: ParsedResource[]; skippedHelmFiles: string[] }> {
   const absDir = path.resolve(dir);
   const files = await glob('**/*.{yaml,yml}', { cwd: absDir, absolute: true });
   files.sort();
 
   const results: ParsedResource[] = [];
+  const skippedHelmFiles: string[] = [];
+
   for (const file of files) {
     try {
-      const parsed = parseFile(file);
-      results.push(...parsed);
+      const rawContent = fs.readFileSync(file, 'utf-8');
+
+      if (hasHelmTemplates(rawContent)) {
+        // Attempt to resolve templates if values are provided
+        const resolved = opts?.helmValues
+          ? resolveHelmTemplates(rawContent, opts.helmValues)
+          : rawContent;
+
+        // If templates remain, skip this file
+        if (hasHelmTemplates(resolved)) {
+          skippedHelmFiles.push(file);
+          continue;
+        }
+
+        // Parse resolved content
+        const parsed = parseContent(resolved, file);
+        results.push(...parsed);
+      } else {
+        const parsed = parseFile(file);
+        results.push(...parsed);
+      }
     } catch {
       // Skip files that can't be read
     }
   }
-  return results;
+
+  return { resources: results, skippedHelmFiles };
 }
 
 /**

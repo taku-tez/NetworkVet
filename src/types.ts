@@ -225,12 +225,85 @@ export interface CiliumNetworkPolicySpec {
   egressDeny?: CiliumNetworkPolicyEgressRule[];
 }
 
+// ─── Gateway API spec types ───────────────────────────────────────────────────
+
+export interface GatewayListener {
+  name: string;
+  port: number;
+  protocol: string; // HTTP, HTTPS, TLS, TCP, UDP
+  tls?: {
+    mode?: string; // Terminate, Passthrough
+    certificateRefs?: Array<{ name: string; namespace?: string }>;
+  };
+  allowedRoutes?: {
+    namespaces?: {
+      from?: string; // All, Same, Selector
+      selector?: { matchLabels?: Record<string, string> };
+    };
+  };
+}
+
+export interface GatewaySpec {
+  gatewayClassName?: string;
+  listeners?: GatewayListener[];
+}
+
+export interface HTTPRouteParentRef {
+  name: string;
+  namespace?: string;
+  sectionName?: string;
+}
+
+export interface HTTPRouteBackendRef {
+  name: string;
+  namespace?: string;
+  port?: number;
+}
+
+export interface HTTPRouteRule {
+  backendRefs?: HTTPRouteBackendRef[];
+  filters?: Array<{ type: string }>;
+}
+
+export interface HTTPRouteSpec {
+  parentRefs?: HTTPRouteParentRef[];
+  rules?: HTTPRouteRule[];
+}
+
+export interface GRPCRouteSpec {
+  parentRefs?: Array<{ name: string; namespace?: string }>;
+  rules?: Array<{
+    backendRefs?: Array<{ name: string; namespace?: string; port?: number }>;
+  }>;
+}
+
+export interface ReferenceGrantSpec {
+  from?: Array<{ group: string; kind: string; namespace: string }>;
+  to?: Array<{ group: string; kind: string; name?: string }>;
+}
+
+export interface GatewayResource extends ParsedResource {
+  spec: GatewaySpec;
+}
+
+export interface HTTPRouteResource extends ParsedResource {
+  spec: HTTPRouteSpec;
+}
+
+export interface GRPCRouteResource extends ParsedResource {
+  spec: GRPCRouteSpec;
+}
+
+export interface ReferenceGrantResource extends ParsedResource {
+  spec: ReferenceGrantSpec;
+}
+
 // Parsed resource from YAML
 export interface ParsedResource {
   kind: ResourceKind;
   apiVersion: string;
   metadata: K8sMetadata;
-  spec: NetworkPolicySpec | ServiceSpec | IngressSpec | AuthorizationPolicySpec | PeerAuthenticationSpec | CiliumNetworkPolicySpec | Record<string, unknown>;
+  spec: NetworkPolicySpec | ServiceSpec | IngressSpec | AuthorizationPolicySpec | PeerAuthenticationSpec | CiliumNetworkPolicySpec | GatewaySpec | HTTPRouteSpec | GRPCRouteSpec | ReferenceGrantSpec | Record<string, unknown>;
   file: string;
   line: number;
 }
@@ -327,4 +400,26 @@ export function getAnnotation(r: ParsedResource, key: string): string | undefine
 /** Returns true when a metadata annotation key is present (value may be any string). */
 export function hasAnnotation(r: ParsedResource, key: string): boolean {
   return key in (r.metadata.annotations ?? {});
+}
+
+// ─── Gateway API type guards ──────────────────────────────────────────────────
+
+/** Returns true when the resource is a Gateway API Gateway. */
+export function isGateway(r: ParsedResource): r is GatewayResource {
+  return r.kind === 'Gateway' && r.apiVersion?.startsWith('gateway.networking.k8s.io');
+}
+
+/** Returns true when the resource is a Gateway API HTTPRoute. */
+export function isHTTPRoute(r: ParsedResource): r is HTTPRouteResource {
+  return r.kind === 'HTTPRoute' && r.apiVersion?.startsWith('gateway.networking.k8s.io');
+}
+
+/** Returns true when the resource is a Gateway API GRPCRoute. */
+export function isGRPCRoute(r: ParsedResource): r is GRPCRouteResource {
+  return r.kind === 'GRPCRoute' && r.apiVersion?.startsWith('gateway.networking.k8s.io');
+}
+
+/** Returns true when the resource is a Gateway API ReferenceGrant. */
+export function isReferenceGrant(r: ParsedResource): r is ReferenceGrantResource {
+  return r.kind === 'ReferenceGrant' && r.apiVersion?.startsWith('gateway.networking.k8s.io');
 }

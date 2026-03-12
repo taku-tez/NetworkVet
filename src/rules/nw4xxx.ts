@@ -305,6 +305,7 @@ export const NW4005: Rule = {
   check(resources: ParsedResource[], _ctx: AnalysisContext): Finding[] {
     const findings: Finding[] = [];
 
+    // ── Pass 1: namespaces that have egress NPs but don't block metadata API ──
     // Get all namespaces that have egress NetworkPolicies.
     // Skip NetworkPolicies without an explicit namespace.
     const nsWithEgressPolicies = new Map<string, ParsedResource[]>();
@@ -320,6 +321,15 @@ export const NW4005: Rule = {
     }
 
     for (const [ns, policies] of nsWithEgressPolicies) {
+      // If any policy in the namespace is a deny-all egress policy, the metadata
+      // API is already unreachable — skip to avoid false positives.
+      const hasDenyAllEgress = policies.some((p) => {
+        const spec = p.spec as NetworkPolicySpec;
+        const types = spec.policyTypes ?? [];
+        return types.includes('Egress') && (!spec.egress || spec.egress.length === 0);
+      });
+      if (hasDenyAllEgress) continue;
+
       // Check if any egress rule explicitly blocks 169.254.169.254
       const blocksMetadata = policies.some((p) => {
         const spec = p.spec as NetworkPolicySpec;
@@ -353,6 +363,38 @@ export const NW4005: Rule = {
           )
         );
       }
+    }
+
+    // ── Pass 2: namespaces with workloads but NO egress NetworkPolicy ──
+    // When there is no egress NP at all, all traffic is unrestricted — including
+    // access to the cloud metadata API at 169.254.169.254.
+    const WORKLOAD_KINDS = new Set([
+      'Pod', 'Deployment', 'StatefulSet', 'DaemonSet', 'ReplicaSet', 'Job', 'CronJob',
+    ]);
+    const nsWithWorkloads = new Map<string, ParsedResource>();
+    for (const r of resources) {
+      if (!WORKLOAD_KINDS.has(r.kind)) continue;
+      const ns = r.metadata.namespace;
+      if (!ns) continue;
+      if (!nsWithWorkloads.has(ns)) nsWithWorkloads.set(ns, r);
+    }
+
+    for (const [ns, refWorkload] of nsWithWorkloads) {
+      // Already reported in pass 1
+      if (nsWithEgressPolicies.has(ns)) continue;
+      // Already reported (shouldn't happen, but guard)
+      if (findings.some((f) => f.namespace === ns)) continue;
+
+      findings.push(
+        makeNamespaceFinding(
+          NW4005,
+          ns,
+          refWorkload.file,
+          refWorkload.line,
+          `Namespace "${ns}" has no egress NetworkPolicy — unrestricted egress allows access to the cloud metadata API (${METADATA_API_IP})`,
+          `Add an egress NetworkPolicy with policyTypes: [Egress] and exclude ${METADATA_API_IP}/32 from allowed destinations to prevent SSRF attacks on cloud metadata`
+        )
+      );
     }
 
     return findings;

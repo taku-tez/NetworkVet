@@ -345,4 +345,79 @@ spec:
     const findings = check(NW4005, yaml);
     expect(findings.filter(f => f.id === 'NW4005')).toHaveLength(0);
   });
+
+  it('does NOT trigger when namespace has a deny-all egress policy', () => {
+    const yaml = `
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-egress
+  namespace: production
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+`;
+    const findings = check(NW4005, yaml);
+    expect(findings.some(f => f.id === 'NW4005')).toBe(false);
+  });
+
+  it('triggers when namespace has workloads but NO egress NetworkPolicy', () => {
+    const yaml = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-server
+  namespace: production
+spec:
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: api:latest
+`;
+    const findings = check(NW4005, yaml);
+    expect(findings.some(f => f.id === 'NW4005')).toBe(true);
+    expect(findings.find(f => f.id === 'NW4005')?.message).toContain('no egress NetworkPolicy');
+  });
+
+  it('does NOT trigger for namespace with workloads AND a deny-all egress policy', () => {
+    const yaml = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-server
+  namespace: production
+spec:
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: api:latest
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-egress
+  namespace: production
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+`;
+    const findings = check(NW4005, yaml);
+    expect(findings.some(f => f.id === 'NW4005')).toBe(false);
+  });
 });

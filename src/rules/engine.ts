@@ -7,12 +7,27 @@ import { nw4xxxRules } from './nw4xxx.js';
 import { nw5xxxRules } from './nw5xxx.js';
 import { nw6xxxRules } from './nw6xxx.js';
 import { nw7xxxRules } from './nw7xxx.js';
+import { nw8Rules } from './nw8xxx.js';
 
 const SEVERITY_ORDER: Record<string, number> = {
   error: 0,
   warning: 1,
   info: 2,
 };
+
+const INLINE_IGNORE_ANNOTATION = 'networkvet.io/ignore';
+
+/**
+ * Returns the set of rule IDs that a specific resource wants to suppress.
+ * Reads the annotation "networkvet.io/ignore" from the resource's metadata.
+ */
+function getInlineIgnores(r: ParsedResource): Set<string> {
+  const annotation = r.metadata.annotations?.[INLINE_IGNORE_ANNOTATION];
+  if (!annotation) return new Set();
+  return new Set(
+    annotation.split(',').map((id) => id.trim().toUpperCase()).filter(Boolean)
+  );
+}
 
 export const allRules: Rule[] = [
   ...nw1xxxRules,
@@ -22,6 +37,7 @@ export const allRules: Rule[] = [
   ...nw5xxxRules,
   ...nw6xxxRules,
   ...nw7xxxRules,
+  ...nw8Rules,
 ];
 
 /**
@@ -121,18 +137,34 @@ export function runRules(
   // Apply per-rule severity overrides from config
   const overridden = applyConfigOverrides(findings, config ?? {});
 
-  // Filter again after override in case a severity override removed a finding
-  // (we do NOT filter by severity here — that is the CLI's job via --severity flag)
+  // Apply per-resource inline ignores (networkvet.io/ignore annotation)
+  const resourceIgnoreMap = new Map<string, Set<string>>();
+  for (const r of resources) {
+    const ignores = getInlineIgnores(r);
+    if (ignores.size > 0) {
+      const key = `${r.kind}::${r.metadata.namespace ?? ''}::${r.metadata.name}`;
+      resourceIgnoreMap.set(key, ignores);
+    }
+  }
+
+  let filteredFindings = overridden;
+  if (resourceIgnoreMap.size > 0) {
+    filteredFindings = filteredFindings.filter((f) => {
+      const key = `${f.kind}::${f.namespace ?? ''}::${f.name}`;
+      const ignores = resourceIgnoreMap.get(key);
+      return !ignores || !ignores.has(f.id.toUpperCase());
+    });
+  }
 
   // Sort: first by file, then by severity (error < warning < info), then by rule ID
-  overridden.sort((a, b) => {
+  filteredFindings.sort((a, b) => {
     if (a.file !== b.file) return a.file.localeCompare(b.file);
     const sevCmp = (SEVERITY_ORDER[a.severity] ?? 99) - (SEVERITY_ORDER[b.severity] ?? 99);
     if (sevCmp !== 0) return sevCmp;
     return a.id.localeCompare(b.id);
   });
 
-  return overridden;
+  return filteredFindings;
 }
 
 /**

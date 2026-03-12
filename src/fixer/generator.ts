@@ -142,6 +142,158 @@ const MSG: Record<string, Messages> = {
     en: 'Add an egress rule that blocks 169.254.169.254/32 (cloud metadata API) to prevent SSRF attacks.',
     ja: 'SSRF 攻撃を防ぐために 169.254.169.254/32（クラウドメタデータ API）をブロックするエグレスルールを追加してください。',
   },
+
+  // ── NW5xxx: Istio / Service Mesh ──────────────────────────────────────────
+  NW5001: {
+    en: 'Replace principals: ["*"] with specific service account URIs (e.g. cluster.local/ns/<ns>/sa/<sa>) to restrict which identities are allowed.',
+    ja: 'principals: ["*"] を特定のサービスアカウント URI（例: cluster.local/ns/<ns>/sa/<sa>）に置き換えて、許可する ID を制限してください。',
+  },
+  NW5002: {
+    en: 'Add principals, namespaces, or ipBlocks to the "source" field so the ALLOW rule is not open to any caller.',
+    ja: '"source" フィールドに principals、namespaces、または ipBlocks を追加して、ALLOW ルールが任意の呼び出し元に開放されないようにしてください。',
+  },
+  NW5003: {
+    en: 'Replace methods: ["*"] with the specific HTTP methods this operation should permit (e.g. ["GET", "POST"]).',
+    ja: 'methods: ["*"] をこの操作で許可すべき特定の HTTP メソッド（例: ["GET", "POST"]）に置き換えてください。',
+  },
+  NW5004: {
+    en: 'Add a "from" (source) or "to" (operation) clause to the ALLOW rule to avoid unconditionally permitting all traffic.',
+    ja: 'ALLOW ルールに "from"（送信元）または "to"（操作）句を追加して、すべてのトラフィックを無条件に許可しないようにしてください。',
+  },
+  NW5005: {
+    en: 'Switch mTLS mode from PERMISSIVE to STRICT to reject plaintext traffic and enforce mutual TLS.',
+    ja: 'mTLS モードを PERMISSIVE から STRICT に変更して、平文トラフィックを拒否し、相互 TLS を強制してください。',
+  },
+  NW5006: {
+    en: 'Enable mTLS by setting mode to STRICT (or PERMISSIVE during migration) instead of DISABLE.',
+    ja: 'DISABLE の代わりに mode を STRICT（または移行中は PERMISSIVE）に設定して mTLS を有効化してください。',
+  },
+  NW5007: {
+    en: 'Add a selector.matchLabels to scope the AuthorizationPolicy to specific workloads rather than all pods in the namespace.',
+    ja: 'selector.matchLabels を追加して、AuthorizationPolicy を Namespace 内のすべての Pod ではなく特定のワークロードに限定してください。',
+  },
+  NW5008: {
+    en: 'Add source.namespaces to restrict the ALLOW rule to principals from the expected namespace only.',
+    ja: 'source.namespaces を追加して、ALLOW ルールを期待する Namespace のプリンシパルのみに制限してください。',
+  },
+
+  // ── NW6xxx: Cilium NetworkPolicy ──────────────────────────────────────────
+  NW6001: {
+    en: 'Replace the "world" entity with specific fromCIDR ranges or more restrictive entities to limit external ingress sources.',
+    ja: '"world" エンティティを特定の fromCIDR レンジまたはより制限的なエンティティに置き換えて、外部イングレス元を制限してください。',
+  },
+  NW6002: {
+    en: 'Replace the "world" entity in egress with specific toCIDR ranges or toFQDNs to restrict outbound destinations.',
+    ja: 'エグレスの "world" エンティティを特定の toCIDR レンジまたは toFQDNs に置き換えて、アウトバウンド先を制限してください。',
+  },
+  NW6003: {
+    en: 'Replace the "all" entity with more specific entities (e.g. "cluster", "host") or label selectors.',
+    ja: '"all" エンティティをより具体的なエンティティ（例: "cluster"、"host"）またはラベルセレクタに置き換えてください。',
+  },
+  NW6004: {
+    en: 'Add matchLabels to the endpointSelector to scope this policy to specific pods rather than all pods in the namespace.',
+    ja: 'endpointSelector に matchLabels を追加して、このポリシーを Namespace 内のすべての Pod ではなく特定の Pod に限定してください。',
+  },
+  NW6005: {
+    en: 'Replace the 0.0.0.0/0 CIDR with specific source CIDR ranges that should be allowed.',
+    ja: '0.0.0.0/0 CIDR を許可すべき特定の送信元 CIDR レンジに置き換えてください。',
+  },
+  NW6006: {
+    en: 'Add a nodeSelector to restrict this CiliumClusterwideNetworkPolicy to specific nodes.',
+    ja: 'nodeSelector を追加して、この CiliumClusterwideNetworkPolicy を特定のノードに限定してください。',
+  },
+  NW6007: {
+    en: 'Replace the toFQDNs matchPattern: "*" with specific domain patterns (e.g. "*.example.com") to limit egress destinations.',
+    ja: 'toFQDNs matchPattern: "*" を特定のドメインパターン（例: "*.example.com"）に置き換えて、エグレス先を制限してください。',
+  },
+  NW6008: {
+    en: 'Verify that Cilium L7 enforcement (Envoy) is enabled in your cluster and that the L7 HTTP rules are intentional.',
+    ja: 'クラスターで Cilium L7 適用（Envoy）が有効になっていることと、L7 HTTP ルールが意図的なものであることを確認してください。',
+  },
+
+  // ── NW7xxx: Cloud Provider ────────────────────────────────────────────────
+  NW7001: {
+    en: 'Add the annotation service.beta.kubernetes.io/aws-load-balancer-internal: "true" or set aws-load-balancer-scheme: internal to make the NLB internal.',
+    ja: 'NLB を内部化するためにアノテーション service.beta.kubernetes.io/aws-load-balancer-internal: "true" を追加するか aws-load-balancer-scheme: internal を設定してください。',
+  },
+  NW7002: {
+    en: 'Enable access logs by setting service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: "true" and configure an S3 bucket for log storage.',
+    ja: 'service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: "true" を設定してアクセスログを有効化し、ログ保存用の S3 バケットを設定してください。',
+  },
+  NW7003: {
+    en: 'Add service.beta.kubernetes.io/aws-load-balancer-ssl-cert with an ACM certificate ARN to enable HTTPS offload.',
+    ja: 'ACM 証明書 ARN を指定した service.beta.kubernetes.io/aws-load-balancer-ssl-cert を追加して HTTPS オフロードを有効化してください。',
+  },
+  NW7004: {
+    en: 'Pin a TLS negotiation policy by adding service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06".',
+    ja: 'service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06" を追加して TLS ネゴシエーションポリシーを固定してください。',
+  },
+  NW7005: {
+    en: 'Add alb.ingress.kubernetes.io/scheme: internal to make the ALB internal, or set scheme: internet-facing explicitly to document the intent.',
+    ja: 'ALB を内部化するために alb.ingress.kubernetes.io/scheme: internal を追加するか、意図を文書化するために scheme: internet-facing を明示的に設定してください。',
+  },
+  NW7006: {
+    en: 'Attach a custom security group via alb.ingress.kubernetes.io/security-groups to restrict which source IPs can reach the ALB.',
+    ja: 'alb.ingress.kubernetes.io/security-groups でカスタムセキュリティグループをアタッチして、ALB にアクセスできる送信元 IP を制限してください。',
+  },
+  NW7007: {
+    en: 'Pin the TLS cipher policy by adding alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06" to prevent weak cipher negotiation.',
+    ja: 'alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06" を追加して TLS 暗号ポリシーを固定し、脆弱な暗号のネゴシエーションを防いでください。',
+  },
+  NW7008: {
+    en: 'Enable connection draining by setting service.beta.kubernetes.io/aws-load-balancer-connection-draining-enabled: "true" to allow in-flight requests to complete.',
+    ja: 'service.beta.kubernetes.io/aws-load-balancer-connection-draining-enabled: "true" を設定して接続ドレインを有効化し、処理中のリクエストを完了させてください。',
+  },
+  NW7009: {
+    en: 'Add networking.gke.io/load-balancer-type: Internal to create an internal passthrough NLB, or confirm the external LB is intentional.',
+    ja: 'networking.gke.io/load-balancer-type: Internal を追加して内部パススルー NLB を作成するか、外部 LB が意図的なものであることを確認してください。',
+  },
+  NW7010: {
+    en: 'Add kubernetes.io/ingress.allow-http: "false" to the Ingress annotations to disable plaintext HTTP traffic.',
+    ja: 'Ingress アノテーションに kubernetes.io/ingress.allow-http: "false" を追加して、平文 HTTP トラフィックを無効化してください。',
+  },
+  NW7011: {
+    en: 'Add cloud.google.com/load-balancer-type: Internal for an internal LB, or document the external intent explicitly.',
+    ja: '内部 LB の場合は cloud.google.com/load-balancer-type: Internal を追加するか、外部 LB であることを明示的に文書化してください。',
+  },
+  NW7012: {
+    en: 'Add spec.securityPolicy referencing a Cloud Armor security policy to protect backend services from DDoS and OWASP threats.',
+    ja: 'Cloud Armor セキュリティポリシーを参照する spec.securityPolicy を追加して、DDoS および OWASP の脅威からバックエンドサービスを保護してください。',
+  },
+  NW7013: {
+    en: 'If this AKS LoadBalancer should be internal, change azure-load-balancer-internal from "false" to "true".',
+    ja: 'この AKS LoadBalancer を内部にする場合は azure-load-balancer-internal を "false" から "true" に変更してください。',
+  },
+  NW7014: {
+    en: 'Explicitly set service.beta.kubernetes.io/azure-load-balancer-internal: "true" for internal LBs or "false" to document the public intent.',
+    ja: '内部 LB の場合は service.beta.kubernetes.io/azure-load-balancer-internal: "true" を、外部 LB の意図を文書化する場合は "false" を明示的に設定してください。',
+  },
+  NW7015: {
+    en: 'Attach a WAF policy via appgw.ingress.kubernetes.io/waf-policy-for-path or azure.application-gateway/waf-policy-id to protect against OWASP threats.',
+    ja: 'OWASP の脅威から保護するために appgw.ingress.kubernetes.io/waf-policy-for-path または azure.application-gateway/waf-policy-id で WAF ポリシーをアタッチしてください。',
+  },
+
+  // ── NW8xxx: Gateway API ────────────────────────────────────────────────────
+  NW8001: {
+    en: 'Reference an HTTPS Gateway listener via sectionName in parentRefs, or add a RequestRedirect filter to enforce TLS.',
+    ja: 'parentRefs の sectionName で HTTPS Gateway リスナーを参照するか、RequestRedirect フィルターを追加して TLS を強制してください。',
+  },
+  NW8002: {
+    en: "Change allowedRoutes.namespaces.from from 'All' to 'Same' or 'Selector' to restrict which namespaces can attach routes.",
+    ja: "allowedRoutes.namespaces.from を 'All' から 'Same' または 'Selector' に変更して、ルートをアタッチできる Namespace を制限してください。",
+  },
+  NW8003: {
+    en: 'Create a ReferenceGrant in the target namespace that permits HTTPRoute resources to reference Services.',
+    ja: 'HTTPRoute リソースが Service を参照できるように、対象の Namespace に ReferenceGrant を作成してください。',
+  },
+  NW8004: {
+    en: 'Add spec.listeners[].tls.certificateRefs pointing to a TLS Secret to enable HTTPS/TLS termination.',
+    ja: 'TLS Secret を参照する spec.listeners[].tls.certificateRefs を追加して HTTPS/TLS 終端を有効化してください。',
+  },
+  NW8005: {
+    en: 'Create a ReferenceGrant in the target namespace that permits GRPCRoute resources to reference Services.',
+    ja: 'GRPCRoute リソースが Service を参照できるように、対象の Namespace に ReferenceGrant を作成してください。',
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -643,6 +795,433 @@ spec:
     description: MSG.NW4005.en,
     descriptionJa: MSG.NW4005.ja,
     fix: blockMetadataYaml(finding.namespace),
+  }),
+
+  // ── NW5xxx: Istio ─────────────────────────────────────────────────────────
+  NW5001: () => ({
+    description: MSG.NW5001.en,
+    descriptionJa: MSG.NW5001.ja,
+    fix: `# Restrict AuthorizationPolicy principals to specific service accounts
+spec:
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/<namespace>/sa/<service-account>"`,
+  }),
+
+  NW5002: () => ({
+    description: MSG.NW5002.en,
+    descriptionJa: MSG.NW5002.ja,
+    fix: `# Add source constraints to the ALLOW rule
+spec:
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/<namespace>/sa/<service-account>"
+            namespaces:
+              - "<allowed-namespace>"`,
+  }),
+
+  NW5003: () => ({
+    description: MSG.NW5003.en,
+    descriptionJa: MSG.NW5003.ja,
+    fix: `# Restrict HTTP methods in the AuthorizationPolicy
+spec:
+  rules:
+    - to:
+        - operation:
+            methods: ["GET", "POST"]  # Replace with required methods only`,
+  }),
+
+  NW5004: () => ({
+    description: MSG.NW5004.en,
+    descriptionJa: MSG.NW5004.ja,
+    fix: `# Add from or to conditions to the ALLOW rule
+spec:
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/<namespace>/sa/<service-account>"
+      to:
+        - operation:
+            methods: ["GET"]`,
+  }),
+
+  NW5005: () => ({
+    description: MSG.NW5005.en,
+    descriptionJa: MSG.NW5005.ja,
+    fix: `# Change mTLS mode from PERMISSIVE to STRICT
+spec:
+  mtls:
+    mode: STRICT`,
+  }),
+
+  NW5006: () => ({
+    description: MSG.NW5006.en,
+    descriptionJa: MSG.NW5006.ja,
+    fix: `# Enable mTLS — use STRICT for full enforcement or PERMISSIVE during migration
+spec:
+  mtls:
+    mode: STRICT`,
+  }),
+
+  NW5007: () => ({
+    description: MSG.NW5007.en,
+    descriptionJa: MSG.NW5007.ja,
+    fix: `# Add a workload selector to scope the AuthorizationPolicy
+spec:
+  selector:
+    matchLabels:
+      app: <your-app-label>`,
+  }),
+
+  NW5008: () => ({
+    description: MSG.NW5008.en,
+    descriptionJa: MSG.NW5008.ja,
+    fix: `# Add source namespace restriction alongside principals
+spec:
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/<namespace>/sa/<service-account>"
+            namespaces:
+              - "<expected-namespace>"`,
+  }),
+
+  // ── NW6xxx: Cilium ────────────────────────────────────────────────────────
+  NW6001: () => ({
+    description: MSG.NW6001.en,
+    descriptionJa: MSG.NW6001.ja,
+    fix: `# Replace "world" entity with specific CIDRs
+spec:
+  ingress:
+    - fromCIDR:
+        - "203.0.113.0/24"  # Replace with your trusted external CIDR ranges`,
+  }),
+
+  NW6002: () => ({
+    description: MSG.NW6002.en,
+    descriptionJa: MSG.NW6002.ja,
+    fix: `# Replace "world" entity with specific egress destinations
+spec:
+  egress:
+    - toCIDR:
+        - "203.0.113.0/24"  # Replace with allowed external CIDR
+    # Or use FQDN-based egress:
+    # - toFQDNs:
+    #     - matchName: "api.example.com"`,
+  }),
+
+  NW6003: () => ({
+    description: MSG.NW6003.en,
+    descriptionJa: MSG.NW6003.ja,
+    fix: `# Replace "all" entity with more specific entities
+spec:
+  ingress:
+    - fromEntities:
+        - "cluster"   # Only allow intra-cluster traffic
+    # Or use label selectors:
+    # - fromEndpoints:
+    #     - matchLabels:
+    #         app: <allowed-app>`,
+  }),
+
+  NW6004: () => ({
+    description: MSG.NW6004.en,
+    descriptionJa: MSG.NW6004.ja,
+    fix: `# Add label selectors to the endpointSelector
+spec:
+  endpointSelector:
+    matchLabels:
+      app: <your-app-label>`,
+  }),
+
+  NW6005: () => ({
+    description: MSG.NW6005.en,
+    descriptionJa: MSG.NW6005.ja,
+    fix: `# Replace 0.0.0.0/0 with specific trusted source CIDRs
+spec:
+  ingress:
+    - fromCIDR:
+        - "10.0.0.0/8"        # Internal network
+        - "203.0.113.0/24"    # Trusted external CIDR`,
+  }),
+
+  NW6006: () => ({
+    description: MSG.NW6006.en,
+    descriptionJa: MSG.NW6006.ja,
+    fix: `# Add nodeSelector to restrict this policy to specific nodes
+spec:
+  nodeSelector:
+    matchLabels:
+      node-role.kubernetes.io/worker: ""  # Replace with target node label`,
+  }),
+
+  NW6007: () => ({
+    description: MSG.NW6007.en,
+    descriptionJa: MSG.NW6007.ja,
+    fix: `# Replace wildcard FQDN pattern with specific domains
+spec:
+  egress:
+    - toFQDNs:
+        - matchName: "api.example.com"
+        - matchPattern: "*.your-domain.com"  # Restrict to your domain`,
+  }),
+
+  NW6008: () => ({
+    description: MSG.NW6008.en,
+    descriptionJa: MSG.NW6008.ja,
+    // Informational — no YAML fix needed, just guidance
+  }),
+
+  // ── NW7xxx: Cloud Provider ────────────────────────────────────────────────
+  NW7001: () => ({
+    description: MSG.NW7001.en,
+    descriptionJa: MSG.NW7001.ja,
+    fix: `# Add internal annotation to the Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    # Or for AWS Load Balancer Controller:
+    # service.beta.kubernetes.io/aws-load-balancer-scheme: internal`,
+  }),
+
+  NW7002: () => ({
+    description: MSG.NW7002.en,
+    descriptionJa: MSG.NW7002.ja,
+    fix: `# Enable access logs on the AWS LoadBalancer Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name: "<your-s3-bucket>"
+    service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: "elb-logs"`,
+  }),
+
+  NW7003: () => ({
+    description: MSG.NW7003.en,
+    descriptionJa: MSG.NW7003.ja,
+    fix: `# Add SSL certificate annotation to the Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:<region>:<account>:certificate/<cert-id>"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"`,
+  }),
+
+  NW7004: () => ({
+    description: MSG.NW7004.en,
+    descriptionJa: MSG.NW7004.ja,
+    fix: `# Pin the TLS negotiation policy on the Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"`,
+  }),
+
+  NW7005: () => ({
+    description: MSG.NW7005.en,
+    descriptionJa: MSG.NW7005.ja,
+    fix: `# Add scheme annotation to the ALB Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal       # for internal ALB
+    # alb.ingress.kubernetes.io/scheme: internet-facing  # for public ALB (explicit)`,
+  }),
+
+  NW7006: () => ({
+    description: MSG.NW7006.en,
+    descriptionJa: MSG.NW7006.ja,
+    fix: `# Attach a custom security group to the ALB Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/security-groups: "sg-<your-security-group-id>"`,
+  }),
+
+  NW7007: () => ({
+    description: MSG.NW7007.en,
+    descriptionJa: MSG.NW7007.ja,
+    fix: `# Pin the SSL cipher policy on the ALB Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"`,
+  }),
+
+  NW7008: () => ({
+    description: MSG.NW7008.en,
+    descriptionJa: MSG.NW7008.ja,
+    fix: `# Enable connection draining on the AWS LoadBalancer Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-connection-draining-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-connection-draining-timeout: "60"`,
+  }),
+
+  NW7009: () => ({
+    description: MSG.NW7009.en,
+    descriptionJa: MSG.NW7009.ja,
+    fix: `# Make the GKE LoadBalancer internal
+metadata:
+  annotations:
+    networking.gke.io/load-balancer-type: Internal
+    # For older GKE versions:
+    # cloud.google.com/load-balancer-type: Internal`,
+  }),
+
+  NW7010: () => ({
+    description: MSG.NW7010.en,
+    descriptionJa: MSG.NW7010.ja,
+    fix: `# Disable HTTP on the GCE Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.allow-http: "false"`,
+  }),
+
+  NW7011: () => ({
+    description: MSG.NW7011.en,
+    descriptionJa: MSG.NW7011.ja,
+    fix: `# Add explicit load-balancer-type annotation to the GKE Service
+metadata:
+  annotations:
+    cloud.google.com/load-balancer-type: Internal   # or omit for external (document intent)`,
+  }),
+
+  NW7012: () => ({
+    description: MSG.NW7012.en,
+    descriptionJa: MSG.NW7012.ja,
+    fix: `# Add Cloud Armor security policy to the BackendConfig
+spec:
+  securityPolicy:
+    name: "<your-cloud-armor-policy-name>"`,
+  }),
+
+  NW7013: () => ({
+    description: MSG.NW7013.en,
+    descriptionJa: MSG.NW7013.ja,
+    fix: `# Change to internal if this should not be public
+metadata:
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"`,
+  }),
+
+  NW7014: () => ({
+    description: MSG.NW7014.en,
+    descriptionJa: MSG.NW7014.ja,
+    fix: `# Explicitly declare the intent for this AKS LoadBalancer
+metadata:
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"   # for internal
+    # service.beta.kubernetes.io/azure-load-balancer-internal: "false"  # for public (explicit)`,
+  }),
+
+  NW7015: () => ({
+    description: MSG.NW7015.en,
+    descriptionJa: MSG.NW7015.ja,
+    fix: `# Attach a WAF policy to the Azure Application Gateway Ingress
+metadata:
+  annotations:
+    appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/<policy>"`,
+  }),
+
+  // ── NW8xxx: Gateway API ────────────────────────────────────────────────────
+  NW8001: () => ({
+    description: MSG.NW8001.en,
+    descriptionJa: MSG.NW8001.ja,
+    fix: `# Update the HTTPRoute parentRefs to point to an HTTPS listener
+spec:
+  parentRefs:
+    - name: <your-gateway-name>
+      sectionName: https   # Reference the HTTPS listener by name
+# Then ensure the Gateway has an HTTPS listener:
+# spec:
+#   listeners:
+#     - name: https
+#       port: 443
+#       protocol: HTTPS
+#       tls:
+#         mode: Terminate
+#         certificateRefs:
+#           - name: <tls-secret-name>`,
+  }),
+
+  NW8002: (finding) => ({
+    description: MSG.NW8002.en,
+    descriptionJa: MSG.NW8002.ja,
+    fix: `# Restrict allowed route namespaces in the Gateway listener
+# Option A — allow only routes from the same namespace
+spec:
+  listeners:
+    - name: <listener-name>
+      allowedRoutes:
+        namespaces:
+          from: Same
+
+# Option B — allow routes from specific namespaces via label selector
+spec:
+  listeners:
+    - name: <listener-name>
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway.networking.k8s.io/route-allowed: "true"
+# (label the allowed namespaces accordingly)`,
+  }),
+
+  NW8003: (finding) => ({
+    description: MSG.NW8003.en,
+    descriptionJa: MSG.NW8003.ja,
+    fix: `# Create a ReferenceGrant in the target namespace to permit cross-namespace access
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-httproute-from-${finding.namespace}
+  namespace: <target-namespace>   # The namespace where the backend Service lives
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: ${finding.namespace}
+  to:
+    - group: ""
+      kind: Service`,
+  }),
+
+  NW8004: () => ({
+    description: MSG.NW8004.en,
+    descriptionJa: MSG.NW8004.ja,
+    fix: `# Add certificateRefs to the HTTPS/TLS listener in the Gateway
+spec:
+  listeners:
+    - name: https
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: <tls-secret-name>   # Name of a TLS Secret in this namespace
+            # namespace: <other-ns>  # omit if Secret is in same namespace`,
+  }),
+
+  NW8005: (finding) => ({
+    description: MSG.NW8005.en,
+    descriptionJa: MSG.NW8005.ja,
+    fix: `# Create a ReferenceGrant in the target namespace to permit cross-namespace access
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: ReferenceGrant
+metadata:
+  name: allow-grpcroute-from-${finding.namespace}
+  namespace: <target-namespace>   # The namespace where the backend Service lives
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: GRPCRoute
+      namespace: ${finding.namespace}
+  to:
+    - group: ""
+      kind: Service`,
   }),
 };
 
